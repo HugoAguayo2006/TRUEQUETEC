@@ -71,7 +71,6 @@ export default function RateSwapScreen({ partner, yourItem, theirItems, onSubmit
 			className="flex flex-col h-full"
 			style={{ background: "#080C12", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
 		>
-			{/* Header */}
 			<div className="px-5 pt-12 pb-5 shrink-0">
 				<button
 					onClick={onSkip}
@@ -89,7 +88,6 @@ export default function RateSwapScreen({ partner, yourItem, theirItems, onSubmit
 			</div>
 
 			<div className="flex-1 overflow-y-auto px-5 pb-4 flex flex-col gap-4">
-				{/* Partner + items summary */}
 				<div
 					className="rounded-2xl p-4 flex items-center gap-4"
 					style={{ background: "#111820", border: "1.5px solid rgba(255,255,255,0.06)" }}
