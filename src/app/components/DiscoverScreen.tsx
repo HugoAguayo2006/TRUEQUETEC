@@ -3,6 +3,7 @@ import { X, Heart } from "lucide-react";
 import React from "react";
 import { api } from "../../services/endpoints";
 import { useApi } from "../../hooks/use_api";
+import { useAuth } from "../../context/AuthContext";
 
 const items = [
 	{
@@ -66,9 +67,12 @@ export default function DiscoverScreen({ onSwipeRight }: Props) {
 	const [exiting, setExiting] = useState<"left" | "right" | null>(null);
 	const dragStartX = useRef(0);
 
+	const { user } = useAuth()
+	if (!user) return
+
 	const { execute, isLoading, data: items, error } = useApi<any[]>();
 	const fetch_items = React.useCallback(() => {
-		execute(() => api.getItems());
+		execute(() => api.getItems(user.id));
 	}, [execute])
 
 	useEffect(() => { fetch_items(); }, [fetch_items])
@@ -96,6 +100,7 @@ export default function DiscoverScreen({ onSwipeRight }: Props) {
 		else if (dragX < -90) triggerPass();
 		else setDragX(0);
 	}
+
 
 	function triggerLike() {
 		setExiting("right");
@@ -157,7 +162,7 @@ export default function DiscoverScreen({ onSwipeRight }: Props) {
 					onTouchMove={(e) => onDragMove(e.touches[0].clientX)}
 					onTouchEnd={onDragEnd}
 				>
-					<img src={item.image_url} alt={item.name} className="w-full h-full object-cover pointer-events-none" draggable={false} />
+					<img src={item.image_url} alt={item.title} className="w-full h-full object-cover pointer-events-none" draggable={false} />
 
 					{/* Gradient */}
 					<div
@@ -193,13 +198,13 @@ export default function DiscoverScreen({ onSwipeRight }: Props) {
 					<div className="absolute bottom-0 left-0 right-0 p-5">
 						<div className="flex items-end justify-between">
 							<div>
-								<h2 className="text-white text-[22px] font-bold leading-tight mb-1">{item.name}</h2>
+								<h2 className="text-white text-[22px] font-bold leading-tight mb-1">{item.title}</h2>
 								<div className="flex items-center gap-2">
 									<span className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>{item.owner}</span>
 								</div>
 							</div>
 							<div className="text-right">
-								<span className="text-xl font-extrabold" style={{ color: "#00CDB8" }}>${item.value}</span>
+								<span className="text-xl font-extrabold" style={{ color: "#00CDB8" }}>${item.estimated_value}</span>
 							</div>
 						</div>
 					</div>

@@ -39,9 +39,11 @@ async def upload_item_image(file: UploadFile = File(...)):
 
 
 @item_router.get("/", response_model=List[ItemResponse], summary="Get all items")
-async def get_items(owner_id: Optional[str] = None, session: AsyncSession = Depends(get_db)):
-    if owner_id:
-        print(owner_id)
+async def get_items(skip: Optional[str] = None,
+     owner_id: Optional[str] = None, session: AsyncSession = Depends(get_db)):
+    if skip:
+        statement = select(Item).where(Item.owner_id != skip)
+    elif owner_id:
         statement = select(Item).where(Item.owner_id == owner_id)
     else:
         statement = select(Item)

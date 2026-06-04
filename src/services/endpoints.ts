@@ -38,8 +38,12 @@ export const api = {
 		});
 	},
 
-	getItems: () =>
-		apiClient<any[]>("/items/", { method: "GET" }),
+	getItems: (userId: string) => {
+		return apiClient<ItemResponseData[]>(`/items?skip=${userId}`, {
+			method: "GET",
+		});
+	},
+
 	getUserItems: (userId: string) => {
 		return apiClient<ItemResponseData[]>(`/items?owner_id=${userId}`, {
 			method: "GET",
