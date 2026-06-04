@@ -1,8 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { X, Heart } from "lucide-react";
 import React from "react";
+import { api } from "../../services/endpoints";
+import { useApi } from "../../hooks/use_api";
 
-const ITEMS = [
+const items = [
 	{
 		id: 1,
 		name: "Cámara analógica Leica M6",
@@ -54,7 +56,7 @@ const ITEMS = [
 ];
 
 interface Props {
-	onSwipeRight: (item: typeof ITEMS[0]) => void;
+	onSwipeRight: (item: typeof items[0]) => void;
 }
 
 export default function DiscoverScreen({ onSwipeRight }: Props) {
@@ -64,8 +66,16 @@ export default function DiscoverScreen({ onSwipeRight }: Props) {
 	const [exiting, setExiting] = useState<"left" | "right" | null>(null);
 	const dragStartX = useRef(0);
 
-	const item = ITEMS[currentIdx];
-	const nextItem = ITEMS[currentIdx + 1];
+	const { execute, isLoading, data: items, error } = useApi<any[]>();
+	const fetch_items = React.useCallback(() => {
+		execute(() => api.getItems());
+	}, [execute])
+
+	useEffect(() => { fetch_items(); }, [fetch_items])
+	if (!items) return
+
+	const item = items[currentIdx];
+	const nextItem = items[currentIdx + 1];
 
 	const rotation = dragX * 0.06;
 	const wantOpacity = Math.min(Math.max(dragX / 90, 0), 1);
@@ -106,15 +116,6 @@ export default function DiscoverScreen({ onSwipeRight }: Props) {
 		}, 280);
 	}
 
-	if (!item) {
-		return (
-			<div className="flex flex-col items-center justify-center h-full gap-3" style={{ background: "#080C12" }}>
-				<span style={{ fontSize: 40 }}>✨</span>
-				<p className="font-bold" style={{ color: "#EEF2F7" }}>Ya viste todo</p>
-				<p className="text-sm" style={{ color: "#7A8A9A" }}>Vuelve más tarde para ver nuevos artículos</p>
-			</div>
-		);
-	}
 
 	const cardStyle = exiting
 		? {
@@ -156,7 +157,7 @@ export default function DiscoverScreen({ onSwipeRight }: Props) {
 					onTouchMove={(e) => onDragMove(e.touches[0].clientX)}
 					onTouchEnd={onDragEnd}
 				>
-					<img src={item.image} alt={item.name} className="w-full h-full object-cover pointer-events-none" draggable={false} />
+					<img src={item.image_url} alt={item.name} className="w-full h-full object-cover pointer-events-none" draggable={false} />
 
 					{/* Gradient */}
 					<div
@@ -190,31 +191,15 @@ export default function DiscoverScreen({ onSwipeRight }: Props) {
 
 					{/* Card info */}
 					<div className="absolute bottom-0 left-0 right-0 p-5">
-						<div className="flex gap-1.5 mb-3">
-							{item.tags.map((tag) => (
-								<span
-									key={tag}
-									className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold"
-									style={{ background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.9)" }}
-								>
-									{tag}
-								</span>
-							))}
-						</div>
-
 						<div className="flex items-end justify-between">
 							<div>
 								<h2 className="text-white text-[22px] font-bold leading-tight mb-1">{item.name}</h2>
 								<div className="flex items-center gap-2">
-									<img src={item.ownerAvatar} alt={item.owner} className="w-5 h-5 rounded-full object-cover" style={{ border: "1px solid rgba(255,255,255,0.3)" }} />
 									<span className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>{item.owner}</span>
-									<span className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>·</span>
-									<span className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>{item.category}</span>
 								</div>
 							</div>
 							<div className="text-right">
 								<span className="text-xl font-extrabold" style={{ color: "#00CDB8" }}>${item.value}</span>
-								<p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>{item.condition}</p>
 							</div>
 						</div>
 					</div>

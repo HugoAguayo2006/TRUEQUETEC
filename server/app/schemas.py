@@ -30,6 +30,7 @@ class ItemCreate(SQLModel):
     owner_id: str
     title: str
     estimated_value: float
+    image_url: str
 
 class ItemRead(SQLModel):
     id: uuid.UUID
@@ -40,12 +41,14 @@ class ItemRead(SQLModel):
 class ItemUpdate(SQLModel):
     title: str
     estimated_value: float
+    image_url: str
 
 class ItemResponse(SQLModel):
     id: str
     owner_id: str
     title: str
     estimated_value: float
+    image_url: str
     class Config: from_attributes = True
 
 class SwipeRequest(SQLModel):

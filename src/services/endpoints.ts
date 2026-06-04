@@ -37,6 +37,9 @@ export const api = {
 			body: itemData,
 		});
 	},
+
+	getItems: () =>
+		apiClient<any[]>("/items/", { method: "GET" }),
 	getUserItems: (userId: string) => {
 		return apiClient<ItemResponseData[]>(`/items?owner_id=${userId}`, {
 			method: "GET",
