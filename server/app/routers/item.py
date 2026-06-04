@@ -1,7 +1,7 @@
-from typing import List
+from typing import List, Optional
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status, Header
 from sqlalchemy.orm import Session
 from app.database import AsyncSession, get_db
 from app.models import  Item
@@ -12,8 +12,12 @@ from sqlmodel import select
 item_router = APIRouter(prefix="/items", tags=["Items"])
 
 @item_router.get("/", response_model=List[ItemResponse], summary="Get all items")
-async def get_all_users(session: AsyncSession = Depends(get_db)):
-    result = await session.execute(select(Item))
+async def get_items(owner_id: Optional[uuid.UUID] = None, session: AsyncSession = Depends(get_db)):
+    if owner_id:
+        statement = select(Item).where(Item.owner_id == owner_id)
+    else:
+        statement = select(Item)
+    result = await session.execute(statement)
     return result.scalars().all()
 
 
@@ -24,11 +28,26 @@ async def get_user(item_id: uuid.UUID, session: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Item not found")
     return item
 
-@item_router.post("/", response_model=ItemResponse, status_code=201, summary="Create a new item")
-async def create_user(data: ItemCreate, session: Session = Depends(get_db)):
-    item = Item(**data.model_dump())
+@item_router.post("/", response_model=ItemResponse, status_code=201, summary="Create a new item explicitly bound to the logged-in user")
+async def create_item(
+    data: ItemCreate, 
+    session: AsyncSession = Depends(get_db), 
+    x_user_id: Optional[str] = Header(None)
+):
+    if not x_user_id:
+        raise HTTPException(status_code=401, detail="X-User-Id header missing. You must be logged in to list items.")
+
+    # Convert the string header to a clean native UUID matching your DB layout
+    try:
+        user_uuid = uuid.UUID(x_user_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID layout format.")
+    item_data = data.model_dump()
+    item_data["owner_id"] = user_uuid 
+
+    item = Item(**item_data)
     session.add(item)
-    await session.commit()
+    await session.commit()      
     await session.refresh(item)
     return item
 
