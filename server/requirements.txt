@@ -7,3 +7,4 @@ dotenv
 aiosqlite
 sqlmodel
 cloudinary 
+python-multipart

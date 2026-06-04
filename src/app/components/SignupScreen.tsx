@@ -3,6 +3,7 @@ import { Eye, EyeOff, ArrowRight, ArrowLeft, Mail, Lock, User } from "lucide-rea
 import React from "react";
 import { useApi } from "../../hooks/use_api.ts";
 import { api } from "../../services/endpoints";
+import { useAuth } from "../../context/AuthContext.tsx";
 
 interface Props {
 	onSignup: () => void;
@@ -18,6 +19,7 @@ export default function SignupScreen({ onSignup, onGoLogin }: Props) {
 	const [bio, setBio] = useState("");
 	const [errors, setErrors] = useState<Partial<typeof fields>>({});
 
+	const { loginSession } = useAuth()
 	const { execute, isLoading, error: apiError } = useApi<any>();
 	function set(k: keyof typeof fields, v: string) {
 		setFields((p) => ({ ...p, [k]: v }));
@@ -46,7 +48,7 @@ export default function SignupScreen({ onSignup, onGoLogin }: Props) {
 					}),
 				{
 					onSuccess: (newUser) => {
-						localStorage.setItem("current_user_id", newUser.id);
+						loginSession(newUser)
 						onSignup();
 					},
 				}
@@ -80,7 +82,6 @@ export default function SignupScreen({ onSignup, onGoLogin }: Props) {
 				style={{ background: "radial-gradient(ellipse 70% 30% at 50% 0%, rgba(0,205,184,0.07) 0%, transparent 65%)" }}
 			/>
 
-			{/* Top bar */}
 			<div className="flex items-center justify-between pt-14 pb-6 shrink-0">
 				<button
 					type="button"
@@ -91,8 +92,6 @@ export default function SignupScreen({ onSignup, onGoLogin }: Props) {
 				>
 					<ArrowLeft size={17} style={{ color: "#EEF2F7" }} />
 				</button>
-
-				{/* Step progress */}
 				<div className="flex items-center gap-1.5">
 					{STEPS.map((s, i) => (
 						<div
@@ -110,22 +109,18 @@ export default function SignupScreen({ onSignup, onGoLogin }: Props) {
 				<div className="w-9" />
 			</div>
 
-			{/* Progress bar */}
 			<div className="h-0.5 rounded-full mb-6 shrink-0" style={{ background: "#111820" }}>
 				<div
 					className="h-full rounded-full transition-all duration-500"
 					style={{ width: `${progress}%`, background: "linear-gradient(90deg, #00CDB8, #009988)" }}
 				/>
 			</div>
-
-			{/* Global API Server Error Banner */}
 			{apiError && (
 				<div className="text-xs p-3.5 mb-4 bg-red-500/10 border border-red-500/20 text-[#FF3A5C] rounded-2xl animate-fade-in shrink-0">
 					{apiError}
 				</div>
 			)}
 
-			{/* Step: Account */}
 			{step === "account" && (
 				<div className="flex flex-col gap-5 flex-1">
 					<div>
@@ -169,7 +164,6 @@ export default function SignupScreen({ onSignup, onGoLogin }: Props) {
 						</div>
 					))}
 
-					{/* Password strength */}
 					{fields.password.length > 0 && (
 						<div className="flex gap-1 -mt-2">
 							{[1, 2, 3, 4].map((i) => {
@@ -185,7 +179,6 @@ export default function SignupScreen({ onSignup, onGoLogin }: Props) {
 							})}
 						</div>
 					)}
-
 					<button
 						type="button"
 						onClick={handleNext}
@@ -194,11 +187,9 @@ export default function SignupScreen({ onSignup, onGoLogin }: Props) {
 							background: "linear-gradient(135deg, #00CDB8, #009988)",
 							color: "#080C12",
 							boxShadow: "0 8px 24px rgba(0,205,184,0.2)",
-						}}
-					>
+						}}>
 						Continue <ArrowRight size={16} />
 					</button>
-
 					<div className="flex items-center justify-center gap-1.5 pb-8">
 						<span className="text-sm" style={{ color: "#7A8A9A" }}>Already have an account?</span>
 						<button type="button" onClick={onGoLogin} className="text-sm font-bold" style={{ color: "#00CDB8" }}>Sign in</button>

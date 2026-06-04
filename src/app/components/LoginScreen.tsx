@@ -3,6 +3,7 @@ import { Eye, EyeOff, ArrowRight, Mail, Lock } from "lucide-react";
 import React from "react";
 import { useApi } from "../../hooks/use_api.ts";
 import { api } from "../../services/endpoints.ts";
+import { useAuth } from "../../context/AuthContext.tsx";
 
 interface Props {
 	onLogin: () => void;
@@ -14,6 +15,7 @@ export default function LoginScreen({ onLogin, onGoSignup }: Props) {
 	const [password, setPassword] = useState("");
 	const [showPw, setShowPw] = useState(false);
 
+	const { loginSession } = useAuth();
 	const { execute, isLoading, error, setError } = useApi<any>();
 	const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
@@ -36,17 +38,14 @@ export default function LoginScreen({ onLogin, onGoSignup }: Props) {
 			// Trigger request manager layer to pull registered users
 			await execute(() => api.getUsers(), {
 				onSuccess: (allUsers: any[]) => {
-					// Search if matching email exists on your FastAPI backend database
 					const existingUser = allUsers.find(
 						(u) => u.email.toLowerCase() === email.toLowerCase()
 					);
 
 					if (existingUser) {
-						// Success! Save user UUID text identifier globally for headers
-						localStorage.setItem("current_user_id", existingUser.id);
+						loginSession(existingUser)
 						onLogin();
 					} else {
-						// User not found in backend DB
 						setErrors({ email: "No account found matching this email" });
 					}
 				}

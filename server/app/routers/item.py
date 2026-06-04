@@ -22,7 +22,7 @@ cloudinary.config(
     api_secret = os.getenv("CLOUDINARY_API_SECRET"),
 )
 
-@item_router.post("/upload-image", summary="Upload an image directly to Cloudinary")
+@item_router.post("/upload-image", summary="Upload an image")
 async def upload_item_image(file: UploadFile = File(...)):
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="File provided must be an image type.")
@@ -33,11 +33,9 @@ async def upload_item_image(file: UploadFile = File(...)):
         
         if not secure_url:
             raise HTTPException(status_code=500, detail="Failed to retrieve URL from Cloudinary.")
-        return {"image_url": secure_url}
-        
+        return {"image_url": secure_url}        
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Cloudinary upload error: {str(e)}")
-
 
 
 @item_router.get("/", response_model=List[ItemResponse], summary="Get all items")
@@ -49,7 +47,6 @@ async def get_items(owner_id: Optional[str] = None, session: AsyncSession = Depe
         statement = select(Item)
     result = await session.execute(statement)
     return result.scalars().all()
-
 
 @item_router.get("/{item_id}", response_model=ItemResponse, summary="Get item by id")
 async def get_user(item_id: uuid.UUID, session: AsyncSession = Depends(get_db)):
