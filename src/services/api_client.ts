@@ -4,11 +4,10 @@ interface RequestOptions extends RequestInit {
 }
 
 export async function apiClient<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-	const token = localStorage.getItem("token");
-
+	const userId = localStorage.getItem("current_user_id");
 	const headers: HeadersInit = {
 		"Content-Type": "application/json",
-		...(token ? { "Authorization": `Bearer ${token}` } : {}),
+		...(userId ? { "X-User-Id": userId } : {}),
 		...options.headers,
 	};
 
