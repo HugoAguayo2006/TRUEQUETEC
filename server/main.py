@@ -1,11 +1,18 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
-from app.database import engine, Base
+from app.database import engine
 from app.routers import router
 from scalar_fastapi import get_scalar_api_reference
 from fastapi.middleware.cors import CORSMiddleware
+from app.init_db import init_db
 
-Base.metadata.create_all(bind=engine)
-app = FastAPI(title="Simple swap")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db()
+    yield
+
+app = FastAPI(lifespan=lifespan)
 app.include_router(router)
 
 app.add_middleware(
@@ -15,7 +22,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/scalar", include_in_schema=False)
+@app.get("/scalar", include_in_schema=True)
 def get_docs_scalar():
     return get_scalar_api_reference(
         openapi_url=app.openapi_url,

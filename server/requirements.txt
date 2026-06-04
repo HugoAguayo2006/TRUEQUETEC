@@ -3,3 +3,6 @@ uvicorn
 sqlalchemy 
 pydantic
 scalar_fastapi
+dotenv
+aiosqlite
+sqlmodel

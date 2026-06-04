@@ -1,18 +1,28 @@
+from typing import List
+import uuid
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.database import get_db
+from app.database import AsyncSessionLocal, get_db
 from app.models import UserModel, ItemModel, SwipeModel
 from app.schemas import UserCreate, UserResponse, ItemCreate, ItemResponse, SwipeRequest
+from app.database import get_db
+from sqlmodel import select
 
 router = APIRouter()
 
-@router.post("/users/", response_model=UserResponse)
-def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = UserModel(username=user.username)
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+@router.post("/users/", response_model=List[UserResponse], summary="Get all users")
+async def create_user(session: AsyncSessionLocal = Depends(get_db)):
+    result = await session.execute(select(UserModel))
+    return result.scalars().all()
+
+@router.get("/users/{user_id}", response_model=UserResponse, summary="Get the user by id")
+async def get_user(user_id: uuid.UUID, session: AsyncSessionLocal = Depends(get_db)):
+    user = await session.get(UserModel, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
 
 @router.post("/items/", response_model=ItemResponse)
 def create_item(item: ItemCreate, db: Session = Depends(get_db)):
