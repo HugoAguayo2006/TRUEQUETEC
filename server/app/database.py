@@ -10,8 +10,8 @@ load_dotenv()
 DATABASE_URL = "sqlite+aiosqlite:///swap.db"
 
 engine = create_async_engine(DATABASE_URL)
-AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
+AsyncSession = async_sessionmaker(engine, expire_on_commit=False)
 
 async def get_db() -> AsyncGenerator[AsyncSession,None]:
-    async with AsyncSessionLocal() as session:
+    async with AsyncSession() as session:
         yield session

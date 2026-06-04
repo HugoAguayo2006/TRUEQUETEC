@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from typing import Optional
 from sqlmodel import Field, SQLModel
 
-class UserModel(SQLModel, table=True):
+class User(SQLModel, table=True):
     __tablename__: str = "users"
     id: str = Field(
         default_factory=lambda: str(uuid.uuid4()),
@@ -13,7 +13,7 @@ class UserModel(SQLModel, table=True):
     rating: float = Field(default=5.0)
 
 
-class ItemModel(SQLModel, table=True):
+class Item(SQLModel, table=True):
     __tablename__: str = "items"
 
     id: str = Field(
@@ -22,16 +22,17 @@ class ItemModel(SQLModel, table=True):
     )
     owner_id: Optional[str] = Field(default=None, foreign_key="users.id")
     title: str = Field(nullable=False)
-    estimated_value: float = Field(nullable=False)
+    estimated_value: float = Field(default=0.0, nullable=False)
 
 
-class SwipeModel(SQLModel, table=True):
+class Swipe(SQLModel, table=True):
     __tablename__: str = "swipes"
 
     id: str = Field(
         default_factory=lambda: str(uuid.uuid4()),
         primary_key=True
     )
+    owner_id: str = Field(foreign_key="users.id", nullable=False)
     swiper_id: str = Field(foreign_key="users.id", nullable=False)
     item_id: str = Field(foreign_key="items.id", nullable=False)
     direction: str = Field(nullable=False)

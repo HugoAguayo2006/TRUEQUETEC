@@ -1,28 +1,47 @@
-from pydantic import BaseModel
-from typing import Optional
+import uuid
+from sqlmodel import SQLModel
 
-class UserCreate(BaseModel):
+class UserCreate(SQLModel):
     username: str
 
-class UserResponse(BaseModel):
+class UserRead(SQLModel):
+    id: uuid.UUID
+    username: str
+    rating: float
+
+class UserUpdate(SQLModel):
+    username: str | None = None
+    rating: str | None = None
+
+class UserResponse(SQLModel):
     id: str
     username: str
     rating: float
     class Config: from_attributes = True
 
-class ItemCreate(BaseModel):
+class ItemCreate(SQLModel):
     owner_id: str
     title: str
     estimated_value: float
 
-class ItemResponse(BaseModel):
+class ItemRead(SQLModel):
+    id: uuid.UUID
+    owner_id: str
+    title: str
+    estimated_value: float
+
+class ItemUpdate(SQLModel):
+    title: str
+    estimated_value: float
+
+class ItemResponse(SQLModel):
     id: str
     owner_id: str
     title: str
     estimated_value: float
     class Config: from_attributes = True
 
-class SwipeRequest(BaseModel):
+class SwipeRequest(SQLModel):
     swiper_id: str
     item_id: str
     direction: str # "like" or "dislike"
