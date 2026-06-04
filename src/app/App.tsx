@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Compass, RefreshCw, MessageCircle, User } from "lucide-react";
+import OnboardingScreen from "./components/OnboardingScreen";
+import LoginScreen from "./components/LoginScreen";
+import SignupScreen from "./components/SignupScreen";
 import DiscoverScreen from "./components/DiscoverScreen";
 import RequestSentScreen from "./components/RequestSentScreen";
 import OwnerPickScreen from "./components/OwnerPickScreen";
@@ -11,6 +14,8 @@ import MessagesScreen from "./components/MessagesScreen";
 import ProfileScreen from "./components/ProfileScreen";
 import RateSwapScreen from "./components/RateSwapScreen";
 import React from "react";
+
+type AuthScreen = "onboarding" | "login" | "signup";
 
 type FlowScreen =
 	| "request-sent"
@@ -64,6 +69,8 @@ const NAV = [
 ];
 
 export default function App() {
+	const [auth, setAuth] = useState<AuthScreen>("onboarding");
+	const [authed, setAuthed] = useState(false);
 	const [tab, setTab] = useState<NavTab>("discover");
 	const [flow, setFlow] = useState<FlowScreen | null>(null);
 	const [swipedItem, setSwipedItem] = useState<typeof WANTED_ITEM | null>(null);
@@ -78,6 +85,42 @@ export default function App() {
 		setFlow(null);
 		setSwipedItem(null);
 		setOfferedItems(DEFAULT_OFFERED);
+
+	function handleSwipeRight(item: typeof WANTED_ITEM) {
+		setSwipedItem(item);
+		setFlow("request-sent");
+	}
+
+	function exitFlow() {
+		setFlow(null);
+		setSwipedItem(null);
+		setOfferedItems(DEFAULT_OFFERED);
+	}
+
+	// Auth wall
+	if (!authed) {
+		if (auth === "onboarding") {
+			return (
+				<OnboardingScreen
+					onLogin={() => setAuth("login")}
+					onSignup={() => setAuth("signup")}
+				/>
+			);
+		}
+		if (auth === "login") {
+			return (
+				<LoginScreen
+					onLogin={() => setAuthed(true)}
+					onGoSignup={() => setAuth("signup")}
+				/>
+			);
+		}
+		return (
+			<SignupScreen
+				onSignup={() => setAuthed(true)}
+				onGoLogin={() => setAuth("login")}
+			/>
+		);
 	}
 
 	const inFlow = flow !== null;
