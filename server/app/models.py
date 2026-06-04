@@ -11,6 +11,8 @@ class User(SQLModel, table=True):
     )
     username: str = Field(unique=True, nullable=False)
     rating: float = Field(default=5.0)
+    email: str = Field(unique=True, nullable=True, default="")
+    bio: str = Field(nullable=True, default="")
 
 
 class Item(SQLModel, table=True):

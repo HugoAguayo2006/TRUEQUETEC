@@ -88,24 +88,20 @@ export default function App() {
 
 	if (!authed) {
 		if (auth === "onboarding") {
-			return (
-				<OnboardingScreen
-					onLogin={() => setAuth("login")}
-					onSignup={() => setAuth("signup")}
-				/>
+			return (<OnboardingScreen onLogin={() => setAuth("login")}
+				onSignup={() => setAuth("signup")}
+			/>
 			);
 		}
 		if (auth === "login") {
 			return (
-				<LoginScreen
-					onLogin={() => setAuthed(true)}
+				<LoginScreen onLogin={() => setAuthed(true)}
 					onGoSignup={() => setAuth("signup")}
 				/>
 			);
 		}
 		return (
-			<SignupScreen
-				onSignup={() => setAuthed(true)}
+			<SignupScreen onSignup={() => setAuthed(true)}
 				onGoLogin={() => setAuth("login")}
 			/>
 		);
@@ -119,7 +115,6 @@ export default function App() {
 			style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#080C12" }}
 		>
 			<div className="flex-1 min-h-0 overflow-hidden">
-				{/* Flow screens take over the full viewport */}
 				{inFlow && flow === "request-sent" && swipedItem && (
 					<RequestSentScreen
 						item={swipedItem}
@@ -176,7 +171,6 @@ export default function App() {
 					/>
 				)}
 
-				{/* Tab views */}
 				{!inFlow && (
 					<>
 						<div className={`h-full ${tab === "discover" ? "block" : "hidden"}`}>
@@ -195,7 +189,6 @@ export default function App() {
 				)}
 			</div>
 
-			{/* Bottom nav — hidden during flow screens */}
 			{!inFlow && (
 				<div
 					className="shrink-0 flex"

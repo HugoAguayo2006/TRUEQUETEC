@@ -68,25 +68,9 @@ export default function ProfileScreen() {
 
 	return (
 		<div className="flex flex-col h-full" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#080C12" }}>
-			{/* Profile hero */}
 			<div className="shrink-0 px-5 pt-12 pb-5">
 				<div className="flex items-start justify-between mb-5">
 					<div className="flex items-center gap-4">
-						<div className="relative">
-							<div className="w-16 h-16 rounded-2xl overflow-hidden" style={{ border: "2px solid rgba(0,205,184,0.3)" }}>
-								<img
-									src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face"
-									alt="Tú"
-									className="w-full h-full object-cover"
-								/>
-							</div>
-							<button
-								className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full flex items-center justify-center"
-								style={{ background: "#00CDB8" }}
-							>
-								<Edit3 size={11} style={{ color: "#080C12" }} />
-							</button>
-						</div>
 						<div>
 							<div className="flex items-center gap-2 mb-0.5">
 								<h2 className="text-lg font-extrabold" style={{ color: "#EEF2F7" }}>Jordan Lee</h2>

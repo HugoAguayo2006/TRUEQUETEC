@@ -3,19 +3,26 @@ from sqlmodel import SQLModel
 
 class UserCreate(SQLModel):
     username: str
+    email: str
+    bio: str
 
 class UserRead(SQLModel):
     id: uuid.UUID
     username: str
+    email: str
     rating: float
 
 class UserUpdate(SQLModel):
     username: str | None = None
     rating: str | None = None
+    email: str | None = None
+    bio: str | None = None
 
 class UserResponse(SQLModel):
     id: str
     username: str
+    email: str
+    bio: str
     rating: float
     class Config: from_attributes = True
 
