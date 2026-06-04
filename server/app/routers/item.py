@@ -1,19 +1,49 @@
 from typing import List, Optional
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status, Header
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Response, status, Header
 from sqlalchemy.orm import Session
 from app.database import AsyncSession, get_db
 from app.models import  Item
 from app.schemas import  ItemCreate, ItemRead, ItemResponse, ItemUpdate
 from app.database import get_db
 from sqlmodel import select
+from dotenv import load_dotenv
+import cloudinary
+import cloudinary.uploader
+import os
 
+load_dotenv()
 item_router = APIRouter(prefix="/items", tags=["Items"])
 
+cloudinary.config( 
+    cloud_name = "dnm3itd3g", 
+    api_key = os.getenv("CLOUDINARY_API_KEY"), 
+    api_secret = os.getenv("CLOUDINARY_API_SECRET"),
+)
+
+@item_router.post("/upload-image", summary="Upload an image directly to Cloudinary")
+async def upload_item_image(file: UploadFile = File(...)):
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="File provided must be an image type.")
+        
+    try:
+        upload_result = cloudinary.uploader.upload(file.file)
+        secure_url = upload_result.get("secure_url")
+        
+        if not secure_url:
+            raise HTTPException(status_code=500, detail="Failed to retrieve URL from Cloudinary.")
+        return {"image_url": secure_url}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Cloudinary upload error: {str(e)}")
+
+
+
 @item_router.get("/", response_model=List[ItemResponse], summary="Get all items")
-async def get_items(owner_id: Optional[uuid.UUID] = None, session: AsyncSession = Depends(get_db)):
+async def get_items(owner_id: Optional[str] = None, session: AsyncSession = Depends(get_db)):
     if owner_id:
+        print(owner_id)
         statement = select(Item).where(Item.owner_id == owner_id)
     else:
         statement = select(Item)
@@ -28,23 +58,10 @@ async def get_user(item_id: uuid.UUID, session: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Item not found")
     return item
 
-@item_router.post("/", response_model=ItemResponse, status_code=201, summary="Create a new item explicitly bound to the logged-in user")
+@item_router.post("/", response_model=ItemResponse, status_code=201, summary="Create a new item")
 async def create_item(
-    data: ItemCreate, 
-    session: AsyncSession = Depends(get_db), 
-    x_user_id: Optional[str] = Header(None)
-):
-    if not x_user_id:
-        raise HTTPException(status_code=401, detail="X-User-Id header missing. You must be logged in to list items.")
-
-    # Convert the string header to a clean native UUID matching your DB layout
-    try:
-        user_uuid = uuid.UUID(x_user_id)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid user ID layout format.")
+    data: ItemCreate, session: AsyncSession = Depends(get_db)): 
     item_data = data.model_dump()
-    item_data["owner_id"] = user_uuid 
-
     item = Item(**item_data)
     session.add(item)
     await session.commit()      
