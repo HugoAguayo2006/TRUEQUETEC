@@ -30,6 +30,17 @@ Thumbs.db
 # Test and coverage output
 coverage/
 .nyc_output/
+.pytest_cache/
+
+# Python
+server/venv/
+__pycache__/
+*.pyc
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
 
 # Temporary files
 tmp/

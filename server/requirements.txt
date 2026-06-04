@@ -3,3 +3,5 @@ uvicorn
 sqlalchemy 
 pydantic
 scalar_fastapi
+# Necesario para que Uvicorn acepte conexiones ws:// del chat en vivo.
+websockets
