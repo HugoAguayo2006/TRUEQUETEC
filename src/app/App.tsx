@@ -85,6 +85,16 @@ export default function App() {
 		setFlow(null);
 		setSwipedItem(null);
 		setOfferedItems(DEFAULT_OFFERED);
+
+	function handleSwipeRight(item: typeof WANTED_ITEM) {
+		setSwipedItem(item);
+		setFlow("request-sent");
+	}
+
+	function exitFlow() {
+		setFlow(null);
+		setSwipedItem(null);
+		setOfferedItems(DEFAULT_OFFERED);
 	}
 
 	// Auth wall
