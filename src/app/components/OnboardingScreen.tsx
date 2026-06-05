@@ -26,16 +26,7 @@ export default function OnboardingScreen({ onLogin, onSignup }: Props) {
 					style={{ background: "linear-gradient(to bottom, rgba(8,12,18,0.2) 0%, rgba(8,12,18,0.0) 30%, rgba(8,12,18,0.95) 80%, #080C12 100%)" }}
 				/>
 				<div className="absolute top-14 left-6 flex items-center gap-2.5">
-					<div
-						className="w-9 h-9 rounded-xl flex items-center justify-center"
-						style={{ background: "linear-gradient(135deg, #00CDB8, #009988)" }}
-					>
-						<svg width="18" height="18" viewBox="0 0 28 28" fill="none">
-							<path d="M7 14C7 10.134 10.134 7 14 7C17.866 7 21 10.134 21 14" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
-							<path d="M21 14C21 17.866 17.866 21 14 21C10.134 21 7 17.866 7 14" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="2 3" />
-							<circle cx="14" cy="14" r="2.5" fill="white" />
-						</svg>
-					</div>
+
 					<span className="text-lg font-extrabold tracking-tight text-white">TRUEQUETEC</span>
 				</div>
 			</div>
