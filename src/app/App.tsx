@@ -65,6 +65,7 @@ export default function App() {
   const [flow, setFlow] = useState<FlowScreen | null>(null);
   const [swipedItem, setSwipedItem] = useState<typeof WANTED_ITEM | null>(null);
   const [offeredItems, setOfferedItems] = useState(DEFAULT_OFFERED);
+  const wantedItem = swipedItem || WANTED_ITEM;
 
   function handleSwipeRight(item: typeof WANTED_ITEM) {
     setSwipedItem(item);
@@ -94,7 +95,7 @@ export default function App() {
         )}
         {inFlow && flow === "owner-pick" && (
           <OwnerPickScreen
-            wantedItem={WANTED_ITEM}
+            wantedItem={wantedItem}
             requester={{ name: "Marcus J.", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face" }}
             onSendOffer={(items) => {
               setOfferedItems(items as typeof DEFAULT_OFFERED);
@@ -105,7 +106,7 @@ export default function App() {
         )}
         {inFlow && flow === "exchange-proposal" && (
           <ExchangeProposalScreen
-            yourItem={WANTED_ITEM}
+            yourItem={wantedItem}
             offeredItems={offeredItems}
             proposer={PROPOSER}
             onAccept={() => setFlow("swap-confirmed")}
@@ -116,7 +117,7 @@ export default function App() {
         )}
         {inFlow && flow === "counter-offer" && (
           <CounterOfferScreen
-            theirItem={WANTED_ITEM}
+            theirItem={wantedItem}
             proposerName={PROPOSER.name}
             onSend={() => setFlow("swap-confirmed")}
             onBack={() => setFlow("exchange-proposal")}
@@ -124,7 +125,7 @@ export default function App() {
         )}
         {inFlow && flow === "swap-confirmed" && (
           <SwapConfirmedScreen
-            yourItem={WANTED_ITEM}
+            yourItem={wantedItem}
             theirItems={offeredItems}
             partnerName={PROPOSER.name}
             partnerAvatar={PROPOSER.avatar}

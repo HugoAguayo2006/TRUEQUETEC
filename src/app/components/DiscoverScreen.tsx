@@ -1,5 +1,6 @@
-import { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X, Heart, Sliders, Bell } from "lucide-react";
+import { estimateProductPrice, type PriceEstimate } from "../../services/endpoints";
 
 const ITEMS = [
   {
@@ -61,14 +62,61 @@ export default function DiscoverScreen({ onSwipeRight }: Props) {
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [exiting, setExiting] = useState<"left" | "right" | null>(null);
+  const [priceEstimates, setPriceEstimates] = useState<Record<number, PriceEstimate>>({});
+  const [priceLoading, setPriceLoading] = useState<Record<number, boolean>>({});
+  const [priceErrors, setPriceErrors] = useState<Record<number, string>>({});
   const dragStartX = useRef(0);
 
   const item = ITEMS[currentIdx];
   const nextItem = ITEMS[currentIdx + 1];
+  const currentEstimate = item ? priceEstimates[item.id] : undefined;
+  const isCurrentPriceLoading = item ? priceLoading[item.id] : false;
+  const currentPriceError = item ? priceErrors[item.id] : undefined;
 
   const rotation = dragX * 0.06;
   const wantOpacity = Math.min(Math.max(dragX / 90, 0), 1);
   const passOpacity = Math.min(Math.max(-dragX / 90, 0), 1);
+
+  useEffect(() => {
+    let isActive = true;
+
+    ITEMS.forEach((discoverItem) => {
+      setPriceLoading((current) => ({ ...current, [discoverItem.id]: true }));
+
+      estimateProductPrice(discoverItem.name)
+        .then((estimate) => {
+          if (!isActive) return;
+          setPriceEstimates((current) => ({ ...current, [discoverItem.id]: estimate }));
+          setPriceErrors((current) => {
+            const next = { ...current };
+            delete next[discoverItem.id];
+            return next;
+          });
+        })
+        .catch((error: unknown) => {
+          if (!isActive) return;
+          setPriceErrors((current) => ({
+            ...current,
+            [discoverItem.id]: error instanceof Error ? error.message : "No se pudo calcular el precio",
+          }));
+        })
+        .finally(() => {
+          if (!isActive) return;
+          setPriceLoading((current) => ({ ...current, [discoverItem.id]: false }));
+        });
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }).format(price);
 
   function onDragStart(x: number) {
     setIsDragging(true);
@@ -89,7 +137,7 @@ export default function DiscoverScreen({ onSwipeRight }: Props) {
   function triggerLike() {
     setExiting("right");
     setTimeout(() => {
-      onSwipeRight(item);
+      onSwipeRight(currentEstimate ? { ...item, value: currentEstimate.average } : item);
       setDragX(0);
       setExiting(null);
       setCurrentIdx((i) => i + 1);
@@ -227,7 +275,20 @@ export default function DiscoverScreen({ onSwipeRight }: Props) {
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-xl font-extrabold" style={{ color: "#00CDB8" }}>${item.value}</span>
+                <span className="text-xl font-extrabold" style={{ color: "#00CDB8" }}>
+                  {currentEstimate
+                    ? formatPrice(currentEstimate.average)
+                    : isCurrentPriceLoading
+                      ? "..."
+                      : "Sin precio"}
+                </span>
+                <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.45)" }}>
+                  {currentEstimate
+                    ? `Promedio web (${currentEstimate.count})`
+                    : currentPriceError
+                      ? "Error API"
+                      : "Calculando"}
+                </p>
                 <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>{item.condition}</p>
               </div>
             </div>

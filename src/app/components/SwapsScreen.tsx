@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RefreshCw, Clock, CheckCircle, XCircle, ChevronRight, Plus } from "lucide-react";
+import { estimateProductPrice, type PriceEstimate } from "../../services/endpoints";
 
 type SwapStatus = "pending" | "offer-received" | "awaiting" | "completed" | "declined";
 
@@ -18,7 +19,7 @@ const SWAPS: Swap[] = [
     status: "offer-received",
     updatedAt: "Ahora",
     yourItem: {
-      name: "Cámara Leica M6",
+      name: "Cámara analógica Leica M6",
       image: "https://images.unsplash.com/photo-1452780212940-6f5c0d14d848?w=200&h=200&fit=crop",
       value: 180,
     },
@@ -37,7 +38,7 @@ const SWAPS: Swap[] = [
     status: "awaiting",
     updatedAt: "Hace 2 h",
     yourItem: {
-      name: "Teclado HHKB",
+      name: "HHKB Pro Hybrid",
       image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=200&h=200&fit=crop",
       value: 210,
     },
@@ -126,10 +127,71 @@ const STATUS_META: Record<SwapStatus, { label: string; color: string; bg: string
 
 export default function SwapsScreen() {
   const [filter, setFilter] = useState<"active" | "history">("active");
+  const [priceEstimates, setPriceEstimates] = useState<Record<string, PriceEstimate>>({});
+  const [priceLoading, setPriceLoading] = useState<Record<string, boolean>>({});
+  const [priceErrors, setPriceErrors] = useState<Record<string, string>>({});
 
   const active = SWAPS.filter((s) => s.status === "offer-received" || s.status === "awaiting" || s.status === "pending");
   const history = SWAPS.filter((s) => s.status === "completed" || s.status === "declined");
   const shown = filter === "active" ? active : history;
+  const itemNames = Array.from(
+    new Set(SWAPS.flatMap((swap) => [swap.yourItem.name, swap.theirItem.name]))
+  );
+
+  useEffect(() => {
+    let isActive = true;
+
+    itemNames.forEach((name) => {
+      setPriceLoading((current) => ({ ...current, [name]: true }));
+
+      estimateProductPrice(name)
+        .then((estimate) => {
+          if (!isActive) return;
+          setPriceEstimates((current) => ({ ...current, [name]: estimate }));
+          setPriceErrors((current) => {
+            const next = { ...current };
+            delete next[name];
+            return next;
+          });
+        })
+        .catch((error: unknown) => {
+          if (!isActive) return;
+          setPriceErrors((current) => ({
+            ...current,
+            [name]: error instanceof Error ? error.message : "No se pudo calcular el precio",
+          }));
+        })
+        .finally(() => {
+          if (!isActive) return;
+          setPriceLoading((current) => ({ ...current, [name]: false }));
+        });
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }).format(price);
+
+  const valueLabel = (item: Swap["yourItem"]) => {
+    const estimate = priceEstimates[item.name];
+    if (estimate) return formatPrice(estimate.average);
+    if (priceLoading[item.name]) return "...";
+    return formatPrice(item.value);
+  };
+
+  const valueSource = (item: Swap["yourItem"]) => {
+    const estimate = priceEstimates[item.name];
+    if (estimate) return "promedio web";
+    if (priceErrors[item.name]) return "valor local";
+    return "calculando";
+  };
 
   return (
     <div className="flex flex-col h-full" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#080C12" }}>
@@ -214,7 +276,8 @@ export default function SwapsScreen() {
                   <div className="min-w-0">
                     <p className="text-xs truncate font-medium" style={{ color: "#7A8A9A" }}>Das</p>
                     <p className="text-sm font-semibold truncate" style={{ color: "#EEF2F7" }}>{swap.yourItem.name}</p>
-                    <p className="text-xs font-semibold" style={{ color: "#00CDB8" }}>${swap.yourItem.value}</p>
+                    <p className="text-xs font-semibold" style={{ color: "#00CDB8" }}>{valueLabel(swap.yourItem)}</p>
+                    <p className="text-[9px]" style={{ color: "#7A8A9A" }}>{valueSource(swap.yourItem)}</p>
                   </div>
                 </div>
 
@@ -229,7 +292,8 @@ export default function SwapsScreen() {
                   <div className="min-w-0 text-right">
                     <p className="text-xs font-medium" style={{ color: "#7A8A9A" }}>Recibes</p>
                     <p className="text-sm font-semibold truncate" style={{ color: "#EEF2F7" }}>{swap.theirItem.name}</p>
-                    <p className="text-xs font-semibold" style={{ color: "#00CDB8" }}>${swap.theirItem.value}</p>
+                    <p className="text-xs font-semibold" style={{ color: "#00CDB8" }}>{valueLabel(swap.theirItem)}</p>
+                    <p className="text-[9px]" style={{ color: "#7A8A9A" }}>{valueSource(swap.theirItem)}</p>
                   </div>
                 </div>
               </div>
