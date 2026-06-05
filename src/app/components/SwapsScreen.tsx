@@ -15,43 +15,43 @@ type DisplayItem = {
 
 const STATUS_META: Record<SwapStatus, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
 	"offer-received": {
-		label: "Oferta recibida",
+		label: "Offer received",
 		color: "#00CDB8",
 		bg: "rgba(0,205,184,0.1)",
 		icon: <RefreshCw size={11} />,
 	},
 	awaiting: {
-		label: "Esperando respuesta",
+		label: "Awaiting reply",
 		color: "#FFD166",
 		bg: "rgba(255,209,102,0.1)",
 		icon: <Clock size={11} />,
 	},
 	pending: {
-		label: "Pendiente",
+		label: "Pending",
 		color: "#7A8A9A",
 		bg: "rgba(122,138,154,0.1)",
 		icon: <Clock size={11} />,
 	},
 	countered: {
-		label: "Contraoferta",
+		label: "Counter offer",
 		color: "#A78BFA",
 		bg: "rgba(167,139,250,0.1)",
 		icon: <RefreshCw size={11} />,
 	},
 	accepted: {
-		label: "Esperando recepción",
+		label: "Awaiting receipt",
 		color: "#38BDF8",
 		bg: "rgba(56,189,248,0.1)",
 		icon: <Clock size={11} />,
 	},
 	completed: {
-		label: "Completado",
+		label: "Completed",
 		color: "#06D6A0",
 		bg: "rgba(6,214,160,0.1)",
 		icon: <CheckCircle size={11} />,
 	},
 	declined: {
-		label: "Rechazado",
+		label: "Declined",
 		color: "#FF3A5C",
 		bg: "rgba(255,58,92,0.1)",
 		icon: <XCircle size={11} />,
@@ -67,12 +67,12 @@ function formatSwapTime(value: string) {
 	if (Number.isNaN(date.getTime())) return "";
 	const diffMs = Date.now() - date.getTime();
 	const mins = Math.floor(diffMs / 60000);
-	if (mins < 1) return "Ahora mismo";
-	if (mins < 60) return `Hace ${mins} min`;
+	if (mins < 1) return "Just now";
+	if (mins < 60) return `${mins}m ago`;
 	const hours = Math.floor(mins / 60);
-	if (hours < 24) return `Hace ${hours} h`;
+	if (hours < 24) return `${hours}h ago`;
 	const days = Math.floor(hours / 24);
-	return `Hace ${days} d`;
+	return `${days}d ago`;
 }
 
 function displayStatus(swap: SwapResponseData, userId: string): SwapStatus {
@@ -90,7 +90,7 @@ function toDisplayItem(item: SwapResponseData["wanted_item"]): DisplayItem {
 	};
 }
 
-function summarizeItems(items: SwapResponseData["offered_items"], fallback = "Sin artículos todavía"): DisplayItem {
+function summarizeItems(items: SwapResponseData["offered_items"], fallback = "No items yet"): DisplayItem {
 	if (!items.length) return { name: fallback, image: "", value: 0 };
 	return {
 		name: items.map((item) => item.title).join(" + "),
@@ -180,9 +180,9 @@ export default function SwapsScreen({ onRate }: Props) {
 					>
 						<ArrowLeft size={17} style={{ color: "#EEF2F7" }} />
 					</button>
-					<p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: "#00CDB8" }}>Solicitud de trueque</p>
+					<p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: "#00CDB8" }}>Swap request</p>
 					<h1 className="text-xl font-extrabold leading-tight" style={{ color: "#EEF2F7" }}>
-						Elige qué quieres de {pickingSwap.partner.username}
+						Pick what you want from {pickingSwap.partner.username}
 					</h1>
 				</div>
 
@@ -190,7 +190,7 @@ export default function SwapsScreen({ onRate }: Props) {
 					<img src={pickingSwap.wanted_item.image_url} alt={pickingSwap.wanted_item.title} className="w-full h-full object-cover" />
 					<div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(0,0,0,0.82), rgba(0,0,0,0.2))" }} />
 					<div className="absolute inset-0 flex flex-col justify-end p-4">
-						<span className="text-white/60 text-xs font-medium uppercase tracking-wider">Quiere</span>
+						<span className="text-white/60 text-xs font-medium uppercase tracking-wider">They want</span>
 						<span className="text-white font-bold text-base leading-tight">{pickingSwap.wanted_item.title}</span>
 						<span className="text-sm font-semibold" style={{ color: "#00CDB8" }}>${pickingSwap.wanted_item.estimated_value}</span>
 					</div>
@@ -198,10 +198,10 @@ export default function SwapsScreen({ onRate }: Props) {
 
 				<div className="flex-1 overflow-y-auto px-5 py-4">
 					{partnerItemsError && <p className="text-xs text-center mb-3" style={{ color: "#FF3A5C" }}>{partnerItemsError}</p>}
-					{isLoadingPartnerItems && !partnerItems && <p className="text-sm text-center py-10" style={{ color: "#7A8A9A" }}>Cargando sus artículos...</p>}
+					{isLoadingPartnerItems && !partnerItems && <p className="text-sm text-center py-10" style={{ color: "#7A8A9A" }}>Loading their items...</p>}
 					{partnerItems?.length === 0 && (
 						<p className="text-sm text-center py-10" style={{ color: "#7A8A9A" }}>
-							{pickingSwap.partner.username} no tiene artículos disponibles para ofrecer.
+							{pickingSwap.partner.username} has no items available to offer.
 						</p>
 					)}
 
@@ -242,7 +242,7 @@ export default function SwapsScreen({ onRate }: Props) {
 					{selectedOfferIds.length > 0 && (
 						<div className="flex items-center justify-between mb-3">
 							<span className="text-sm" style={{ color: "#7A8A9A" }}>
-								{selectedOfferIds.length} seleccionados · ${selectedValue}
+								{selectedOfferIds.length} selected · ${selectedValue}
 							</span>
 							<span className="text-sm font-semibold" style={{ color: diff >= 0 ? "#00CDB8" : "#FF3A5C" }}>
 								{diff >= 0 ? "+" : "-"}${Math.abs(diff)}
@@ -259,7 +259,7 @@ export default function SwapsScreen({ onRate }: Props) {
 							color: selectedOfferIds.length > 0 ? "#080C12" : "#4A5A6A",
 						}}
 					>
-						{isSendingOffer ? "Enviando..." : "Enviar oferta"}
+						{isSendingOffer ? "Sending..." : "Send offer"}
 					</button>
 				</div>
 			</div>
@@ -270,7 +270,7 @@ export default function SwapsScreen({ onRate }: Props) {
 		<div className="flex flex-col h-full" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#080C12" }}>
 			<div className="px-5 pt-12 pb-5 shrink-0">
 				<div className="flex items-end justify-between mb-5">
-					<h1 className="text-2xl font-extrabold" style={{ color: "#EEF2F7" }}>Trueques</h1>
+					<h1 className="text-2xl font-extrabold" style={{ color: "#EEF2F7" }}>Swaps</h1>
 					<div className="flex rounded-2xl p-1" style={{ background: "#111820" }}>
 						{(["active", "history"] as const).map((id) => (
 							<button
@@ -279,7 +279,7 @@ export default function SwapsScreen({ onRate }: Props) {
 								className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
 								style={{ background: filter === id ? "#00CDB8" : "transparent", color: filter === id ? "#080C12" : "#7A8A9A" }}
 							>
-								{id === "active" ? "Activos" : "Historial"}
+								{id === "active" ? "Active" : "History"}
 							</button>
 						))}
 					</div>
@@ -288,12 +288,12 @@ export default function SwapsScreen({ onRate }: Props) {
 
 			<div className="flex-1 overflow-y-auto px-5 pb-6 flex flex-col gap-3">
 				{error && <p className="text-xs text-center" style={{ color: "#FF3A5C" }}>{error}</p>}
-				{isLoading && !swaps && <p className="text-sm text-center py-12" style={{ color: "#7A8A9A" }}>Cargando trueques...</p>}
+				{isLoading && !swaps && <p className="text-sm text-center py-12" style={{ color: "#7A8A9A" }}>Loading swaps...</p>}
 
 				{shown.length === 0 && !isLoading && (
 					<div className="flex flex-col items-center justify-center flex-1 gap-3 py-20" style={{ color: "#7A8A9A" }}>
 						<RefreshCw size={32} style={{ color: "#1A2230" }} />
-						<p className="text-sm">{filter === "active" ? "Aún no hay trueques activos" : "Aún no hay historial"}</p>
+						<p className="text-sm">No {filter === "active" ? "active swaps" : "history"} yet</p>
 					</div>
 				)}
 
@@ -306,7 +306,7 @@ export default function SwapsScreen({ onRate }: Props) {
 					const canConfirmReceived = swap.status === "accepted" && swap.requester_id === user.id;
 					const isCompleted = status === "completed";
 					const alreadyRated = rated.includes(swap.id);
-					const offeredSummary = summarizeItems(swap.offered_items, "Esperando oferta");
+					const offeredSummary = summarizeItems(swap.offered_items, "Waiting for offer");
 					const offeredTotal = swap.offered_items.reduce((sum, item) => sum + item.estimated_value, 0);
 					const valueDiff = offeredTotal - swap.wanted_item.estimated_value;
 					const wantedItem = toDisplayItem(swap.wanted_item);
@@ -349,7 +349,7 @@ export default function SwapsScreen({ onRate }: Props) {
 										) : null}
 									</div>
 									<div className="min-w-0">
-										<p className="text-xs truncate font-medium" style={{ color: "#7A8A9A" }}>Das</p>
+										<p className="text-xs truncate font-medium" style={{ color: "#7A8A9A" }}>You give</p>
 										<p className="text-sm font-semibold truncate" style={{ color: "#EEF2F7" }}>{yourItem.name}</p>
 										<p className="text-xs font-semibold" style={{ color: "#00CDB8" }}>${yourItem.value}</p>
 									</div>
@@ -366,7 +366,7 @@ export default function SwapsScreen({ onRate }: Props) {
 										) : null}
 									</div>
 									<div className="min-w-0 text-right">
-										<p className="text-xs font-medium" style={{ color: "#7A8A9A" }}>Recibes</p>
+										<p className="text-xs font-medium" style={{ color: "#7A8A9A" }}>You get</p>
 										<p className="text-sm font-semibold truncate" style={{ color: "#EEF2F7" }}>{theirItem.name}</p>
 										<p className="text-xs font-semibold" style={{ color: "#00CDB8" }}>${theirItem.value}</p>
 									</div>
@@ -380,7 +380,7 @@ export default function SwapsScreen({ onRate }: Props) {
 								>
 									<div className="flex items-center justify-between mb-2">
 										<span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#7A8A9A" }}>
-											Detalles de la oferta
+											Offer details
 										</span>
 										<span className="text-xs font-bold" style={{ color: valueDiff >= 0 ? "#00CDB8" : "#FF3A5C" }}>
 											{valueDiff >= 0 ? "+" : "-"}{money(Math.abs(valueDiff))}
@@ -396,7 +396,7 @@ export default function SwapsScreen({ onRate }: Props) {
 											</div>
 											<div className="flex-1 min-w-0">
 												<p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#7A8A9A" }}>
-													Artículo solicitado
+													Requested item
 												</p>
 												<p className="text-sm font-semibold truncate" style={{ color: "#EEF2F7" }}>{swap.wanted_item.title}</p>
 											</div>
@@ -408,7 +408,7 @@ export default function SwapsScreen({ onRate }: Props) {
 										<div className="p-3 flex flex-col gap-2">
 											<div className="flex items-center justify-between">
 												<p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#7A8A9A" }}>
-													Artículos seleccionados ({swap.offered_items.length})
+													Selected items ({swap.offered_items.length})
 												</p>
 												<span className="text-xs font-bold" style={{ color: "#EEF2F7" }}>{money(offeredTotal)}</span>
 											</div>
@@ -434,14 +434,14 @@ export default function SwapsScreen({ onRate }: Props) {
 										className="py-2 rounded-xl font-semibold text-sm"
 										style={{ background: "rgba(255,58,92,0.1)", color: "#FF3A5C" }}
 									>
-										Rechazar
+										Decline
 									</button>
 									<button
 										onClick={() => setSwapStatus(swap.id, "accepted")}
 										className="flex items-center justify-center gap-1 py-2 rounded-xl font-semibold text-sm"
 										style={{ background: "rgba(0,205,184,0.15)", color: "#00CDB8" }}
 									>
-										Aceptar <ChevronRight size={15} />
+										Accept <ChevronRight size={15} />
 									</button>
 								</div>
 							)}
@@ -452,7 +452,7 @@ export default function SwapsScreen({ onRate }: Props) {
 									className="flex w-full items-center justify-center gap-1.5 mt-3 pt-3 font-semibold text-sm"
 									style={{ borderTop: "1px solid rgba(56,189,248,0.18)", color: "#38BDF8" }}
 								>
-									Confirmar recepción <CheckCircle size={15} />
+									Confirm received <CheckCircle size={15} />
 								</button>
 							)}
 
@@ -462,7 +462,7 @@ export default function SwapsScreen({ onRate }: Props) {
 									className="flex w-full items-center justify-center gap-1.5 mt-3 pt-3 font-semibold text-sm"
 									style={{ borderTop: "1px solid rgba(0,205,184,0.15)", color: "#00CDB8" }}
 								>
-									Elegir artículos para pedir <ChevronRight size={15} />
+									Pick items to request <ChevronRight size={15} />
 								</button>
 							)}
 
@@ -476,14 +476,14 @@ export default function SwapsScreen({ onRate }: Props) {
 									style={{ borderTop: "1px solid rgba(255,255,255,0.06)", color: "#FFD166" }}
 								>
 									<Star size={14} className="fill-current" />
-									Calificar este trueque
+									Rate this swap
 								</button>
 							)}
 
 							{isCompleted && alreadyRated && (
 								<div className="flex w-full items-center justify-center gap-2 mt-3 pt-3 text-sm" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", color: "#4A5A6A" }}>
 									<CheckCircle size={13} />
-									Calificado
+									Rated
 								</div>
 							)}
 						</div>

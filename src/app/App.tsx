@@ -18,10 +18,10 @@ type FlowScreen = "rate-swap";
 type NavTab = "discover" | "swaps" | "messages" | "profile";
 
 const NAV = [
-	{ id: "discover" as NavTab, icon: Compass, label: "Descubrir" },
-	{ id: "swaps" as NavTab, icon: RefreshCw, label: "Trueques" },
-	{ id: "messages" as NavTab, icon: MessageCircle, label: "Mensajes" },
-	{ id: "profile" as NavTab, icon: User, label: "Perfil" },
+	{ id: "discover" as NavTab, icon: Compass, label: "Discover" },
+	{ id: "swaps" as NavTab, icon: RefreshCw, label: "Swaps" },
+	{ id: "messages" as NavTab, icon: MessageCircle, label: "Messages" },
+	{ id: "profile" as NavTab, icon: User, label: "Profile" },
 ];
 
 function toRateItem(item: ItemResponseData) {
