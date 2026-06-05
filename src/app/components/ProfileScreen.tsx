@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Star, Shield, Settings, ChevronRight, Plus, Edit3, LogOut, Bell, Lock, HelpCircle } from "lucide-react";
+import { estimateProductPrice, type PriceEstimate } from "../../services/endpoints";
 
 const MY_LISTINGS = [
   {
     id: 1,
-    name: "Cámara analógica vintage",
+    name: "Cámara analógica Leica M6",
     value: 180,
     condition: "Buen estado",
     image: "https://images.unsplash.com/photo-1452780212940-6f5c0d14d848?w=300&h=300&fit=crop",
@@ -12,7 +13,7 @@ const MY_LISTINGS = [
   },
   {
     id: 2,
-    name: "Teclado HHKB",
+    name: "HHKB Pro Hybrid",
     value: 210,
     condition: "Como nuevo",
     image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=300&h=300&fit=crop",
@@ -64,6 +65,50 @@ const SETTINGS_ROWS = [
 
 export default function ProfileScreen() {
   const [tab, setTab] = useState<"listings" | "reviews" | "settings">("listings");
+  const [priceEstimates, setPriceEstimates] = useState<Record<number, PriceEstimate>>({});
+  const [priceLoading, setPriceLoading] = useState<Record<number, boolean>>({});
+  const [priceErrors, setPriceErrors] = useState<Record<number, string>>({});
+
+  useEffect(() => {
+    let isActive = true;
+
+    MY_LISTINGS.forEach((item) => {
+      setPriceLoading((current) => ({ ...current, [item.id]: true }));
+
+      estimateProductPrice(item.name)
+        .then((estimate) => {
+          if (!isActive) return;
+          setPriceEstimates((current) => ({ ...current, [item.id]: estimate }));
+          setPriceErrors((current) => {
+            const next = { ...current };
+            delete next[item.id];
+            return next;
+          });
+        })
+        .catch((error: unknown) => {
+          if (!isActive) return;
+          setPriceErrors((current) => ({
+            ...current,
+            [item.id]: error instanceof Error ? error.message : "No se pudo calcular el precio",
+          }));
+        })
+        .finally(() => {
+          if (!isActive) return;
+          setPriceLoading((current) => ({ ...current, [item.id]: false }));
+        });
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }).format(price);
 
   return (
     <div className="flex flex-col h-full" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#080C12" }}>
@@ -158,7 +203,12 @@ export default function ProfileScreen() {
               Agregar publicación
             </button>
 
-            {MY_LISTINGS.map((item) => (
+            {MY_LISTINGS.map((item) => {
+              const estimate = priceEstimates[item.id];
+              const isLoadingPrice = priceLoading[item.id];
+              const priceError = priceErrors[item.id];
+
+              return (
               <div
                 key={item.id}
                 className="flex items-center gap-3 p-3 rounded-2xl"
@@ -171,7 +221,16 @@ export default function ProfileScreen() {
                   <p className="font-semibold text-sm truncate" style={{ color: "#EEF2F7" }}>{item.name}</p>
                   <p className="text-xs mt-0.5" style={{ color: "#7A8A9A" }}>{item.condition}</p>
                   <div className="flex items-center gap-2 mt-1.5">
-                    <span className="font-bold text-sm" style={{ color: "#00CDB8" }}>${item.value}</span>
+                    <span className="font-bold text-sm" style={{ color: "#00CDB8" }}>
+                      {estimate ? formatPrice(estimate.average) : isLoadingPrice ? "Calculando..." : formatPrice(item.value)}
+                    </span>
+                    <span className="text-[10px]" style={{ color: "#7A8A9A" }}>
+                      {estimate
+                        ? `promedio web (${estimate.count})`
+                        : priceError
+                          ? "valor local"
+                          : "estimando"}
+                    </span>
                     {item.offers > 0 && (
                       <span
                         className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
@@ -181,12 +240,18 @@ export default function ProfileScreen() {
                       </span>
                     )}
                   </div>
+                  {estimate && (
+                    <p className="text-[10px] mt-1 truncate" style={{ color: "#7A8A9A" }}>
+                      Min {formatPrice(estimate.minimum)} · Max {formatPrice(estimate.maximum)} · {estimate.stores[0]?.store}
+                    </p>
+                  )}
                 </div>
                 <button style={{ color: "#7A8A9A" }}>
                   <ChevronRight size={18} />
                 </button>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
