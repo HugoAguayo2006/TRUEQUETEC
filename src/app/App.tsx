@@ -8,6 +8,7 @@ import SwapsScreen from "./components/SwapsScreen";
 import MessagesScreen from "./components/MessagesScreen";
 import ProfileScreen from "./components/ProfileScreen";
 import RateSwapScreen from "./components/RateSwapScreen";
+import AdminScreen from "./components/AdminScreen";
 import React from "react";
 import { api, ItemResponseData, SwapResponseData } from "../services/endpoints";
 import { useAuth } from "../context/AuthContext";
@@ -106,6 +107,10 @@ export default function App() {
 
 	const inFlow = flow !== null;
 	const ratingPayload = flow === "rate-swap" ? getRatingPayload() : null;
+
+	if (user?.role === "admin") {
+		return <AdminScreen />;
+	}
 
 	return (
 		<div

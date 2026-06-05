@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState } from "react";
 interface UserProfile {
 	id: string;
 	email: string;
+	role?: "user" | "admin";
 	name?: string;
 	[key: string]: any;
 }
