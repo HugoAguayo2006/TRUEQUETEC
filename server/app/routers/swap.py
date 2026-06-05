@@ -17,7 +17,7 @@ from app.schemas import (
 )
 from sqlmodel import select
 
-swap_router = APIRouter(prefix="/swaps", tags=["Swaps"])
+swap_router = APIRouter(prefix="/swaps", tags=["Trueques"])
 
 
 class ConnectionManager:
@@ -128,7 +128,7 @@ async def swaps_websocket(websocket: WebSocket, user_id: str):
         manager.disconnect(user_id, websocket)
 
 
-@swap_router.get("/", response_model=List[SwapResponse], summary="Get swaps for a user")
+@swap_router.get("/", response_model=List[SwapResponse], summary="Obtener trueques de un usuario")
 async def get_swaps(user_id: str, session: AsyncSession = Depends(get_db)):
     statement = (
         select(Swap)
@@ -140,7 +140,7 @@ async def get_swaps(user_id: str, session: AsyncSession = Depends(get_db)):
     return [await _get_swap_response(swap, session, user_id) for swap in swaps]
 
 
-@swap_router.post("/", response_model=SwapResponse, status_code=201, summary="Create a swap request")
+@swap_router.post("/", response_model=SwapResponse, status_code=201, summary="Crear una solicitud de trueque")
 async def create_swap(data: SwapCreate, session: AsyncSession = Depends(get_db)):
     wanted_item = await session.get(Item, data.wanted_item_id)
     if not wanted_item:
@@ -174,7 +174,7 @@ async def create_swap(data: SwapCreate, session: AsyncSession = Depends(get_db))
     return await _get_swap_response(swap, session, data.requester_id)
 
 
-@swap_router.patch("/{swap_id}/offer", response_model=SwapResponse, summary="Attach offered items to a swap")
+@swap_router.patch("/{swap_id}/offer", response_model=SwapResponse, summary="Agregar artículos ofrecidos a un trueque")
 async def update_swap_offer(
     swap_id: str,
     data: SwapOfferUpdate,
@@ -204,7 +204,7 @@ async def update_swap_offer(
     return await _get_swap_response(swap, session, swap.requester_id)
 
 
-@swap_router.patch("/{swap_id}/status", response_model=SwapResponse, summary="Update swap status")
+@swap_router.patch("/{swap_id}/status", response_model=SwapResponse, summary="Actualizar estado del trueque")
 async def update_swap_status(
     swap_id: str,
     data: SwapStatusUpdate,
@@ -238,7 +238,7 @@ async def update_swap_status(
     return await _get_swap_response(swap, session)
 
 
-@swap_router.get("/{swap_id}/messages", response_model=List[MessageResponse], summary="Get swap messages")
+@swap_router.get("/{swap_id}/messages", response_model=List[MessageResponse], summary="Obtener mensajes del trueque")
 async def get_messages(swap_id: str, session: AsyncSession = Depends(get_db)):
     result = await session.execute(
         select(Message)
@@ -248,7 +248,7 @@ async def get_messages(swap_id: str, session: AsyncSession = Depends(get_db)):
     return result.scalars().all()
 
 
-@swap_router.post("/{swap_id}/messages", response_model=MessageResponse, status_code=201, summary="Send a swap message")
+@swap_router.post("/{swap_id}/messages", response_model=MessageResponse, status_code=201, summary="Enviar mensaje del trueque")
 async def create_message(
     swap_id: str,
     data: MessageCreate,
@@ -306,7 +306,7 @@ async def _recalculate_user_rating(user_id: str, session: AsyncSession) -> User:
     return user
 
 
-@swap_router.post("/{swap_id}/ratings", response_model=SwapRatingResponse, status_code=201, summary="Rate a completed swap")
+@swap_router.post("/{swap_id}/ratings", response_model=SwapRatingResponse, status_code=201, summary="Calificar un trueque completado")
 async def rate_swap(
     swap_id: str,
     data: SwapRatingCreate,

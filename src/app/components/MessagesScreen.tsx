@@ -46,6 +46,18 @@ function money(value: number) {
   return `$${value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
 }
 
+function statusLabel(status: string) {
+  const labels: Record<string, string> = {
+    pending: "Pendiente",
+    awaiting: "Esperando respuesta",
+    accepted: "Aceptado",
+    countered: "Contraoferta",
+    completed: "Completado",
+    declined: "Rechazado",
+  };
+  return labels[status] || status.replace("-", " ");
+}
+
 export default function MessagesScreen() {
   const [openSwap, setOpenSwap] = useState<SwapResponseData | null>(null);
   const [showSwapDetails, setShowSwapDetails] = useState(false);

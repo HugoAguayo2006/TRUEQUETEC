@@ -32,4 +32,3 @@ export async function apiClient<T>(endpoint: string, options: RequestOptions = {
 
 	return data as T;
 }
-

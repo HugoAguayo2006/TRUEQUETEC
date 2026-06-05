@@ -11,7 +11,7 @@ from app.schemas import UserCreate, UserLogin, UserRead, UserResponse, UserUpdat
 from app.database import get_db
 from sqlmodel import select, delete
 
-user_router = APIRouter(prefix="/users", tags=["Users"])
+user_router = APIRouter(prefix="/users", tags=["Usuarios"])
 
 PASSWORD_ITERATIONS = 210_000
 
@@ -37,12 +37,12 @@ def verify_password(password: str, stored_hash: str) -> bool:
     except (ValueError, TypeError):
         return False
 
-@user_router.get("/", response_model=List[UserResponse], summary="Get all users")
+@user_router.get("/", response_model=List[UserResponse], summary="Obtener todos los usuarios")
 async def get_all_users(session: AsyncSession = Depends(get_db)):
     result = await session.execute(select(User))
     return result.scalars().all()
 
-@user_router.post("/", response_model=UserResponse, status_code=201, summary="Create a new user")
+@user_router.post("/", response_model=UserResponse, status_code=201, summary="Crear un usuario")
 async def create_user(data: UserCreate, session: Session = Depends(get_db)):
     user_data = data.model_dump()
     password = user_data.pop("password")
@@ -55,7 +55,7 @@ async def create_user(data: UserCreate, session: Session = Depends(get_db)):
     await session.refresh(user)
     return user
 
-@user_router.post("/login", response_model=UserResponse, summary="Log in with email and password")
+@user_router.post("/login", response_model=UserResponse, summary="Iniciar sesión con correo y contraseña")
 async def login_user(data: UserLogin, session: AsyncSession = Depends(get_db)):
     result = await session.execute(select(User).where(User.email == data.email))
     user = result.scalars().first()
@@ -74,14 +74,14 @@ async def login_user(data: UserLogin, session: AsyncSession = Depends(get_db)):
 
     return user
 
-@user_router.get("/{user_id}", response_model=UserResponse, summary="Get the user by id")
+@user_router.get("/{user_id}", response_model=UserResponse, summary="Obtener usuario por id")
 async def get_user(user_id: str, session: AsyncSession = Depends(get_db)):
     user = await session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     return user
 
-@user_router.patch("/{user_id}", response_model=UserRead, summary="Update user by id")
+@user_router.patch("/{user_id}", response_model=UserRead, summary="Actualizar usuario por id")
 async def update_user(user_id: str, data: UserUpdate, session: AsyncSession = Depends(get_db)):
     user = await session.get(User, user_id)
     if not user:
@@ -101,7 +101,7 @@ async def update_user(user_id: str, data: UserUpdate, session: AsyncSession = De
     await session.refresh(user)
     return user
 
-@user_router.delete("/{user_id}", status_code=204, summary="Delete user by id")
+@user_router.delete("/{user_id}", status_code=204, summary="Eliminar usuario por id")
 async def delete_user(user_id: str, session: AsyncSession = Depends(get_db)):
     user = await session.get(User, user_id)
     if not user:
@@ -111,4 +111,3 @@ async def delete_user(user_id: str, session: AsyncSession = Depends(get_db)):
     await session.delete(user)
     await session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-

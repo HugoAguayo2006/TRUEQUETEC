@@ -11,7 +11,7 @@ import cloudinary.uploader
 import os
 
 load_dotenv()
-item_router = APIRouter(prefix="/items", tags=["Items"])
+item_router = APIRouter(prefix="/items", tags=["Artículos"])
 
 cloudinary.config( 
     cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME"), 
@@ -19,7 +19,7 @@ cloudinary.config(
     api_secret = os.getenv("CLOUDINARY_API_SECRET"),
 )
 
-@item_router.post("/upload-image", summary="Upload an image")
+@item_router.post("/upload-image", summary="Subir una imagen")
 async def upload_item_image(file: UploadFile = File(...)):
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="El archivo debe ser una imagen.")
@@ -35,7 +35,7 @@ async def upload_item_image(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Error al subir a Cloudinary: {str(e)}")
 
 
-@item_router.get("/", response_model=List[ItemResponse], summary="Get all items")
+@item_router.get("/", response_model=List[ItemResponse], summary="Obtener todos los artículos")
 async def get_items(skip: Optional[str] = None,
      owner_id: Optional[str] = None,
      available_only: bool = False,
@@ -51,14 +51,14 @@ async def get_items(skip: Optional[str] = None,
     result = await session.execute(statement)
     return result.scalars().all()
 
-@item_router.get("/{item_id}", response_model=ItemResponse, summary="Get item by id")
+@item_router.get("/{item_id}", response_model=ItemResponse, summary="Obtener artículo por id")
 async def get_item(item_id: str, session: AsyncSession = Depends(get_db)):
     item = await session.get(Item, item_id)
     if not item:
         raise HTTPException(status_code=404, detail="Artículo no encontrado")
     return item
 
-@item_router.post("/", response_model=ItemResponse, status_code=201, summary="Create a new item")
+@item_router.post("/", response_model=ItemResponse, status_code=201, summary="Crear un artículo")
 async def create_item(
     data: ItemCreate, session: AsyncSession = Depends(get_db)): 
     item_data = data.model_dump()
@@ -68,7 +68,7 @@ async def create_item(
     await session.refresh(item)
     return item
 
-@item_router.patch("/{item_id}", response_model=ItemResponse, summary="Update item by id")
+@item_router.patch("/{item_id}", response_model=ItemResponse, summary="Actualizar artículo por id")
 async def update_item(item_id: str, data: ItemUpdate, session: AsyncSession = Depends(get_db)):
     item = await session.get(Item, item_id)
     if not item:
@@ -88,7 +88,7 @@ async def update_item(item_id: str, data: ItemUpdate, session: AsyncSession = De
     return item
 
 
-@item_router.delete("/{item_id}", status_code=204, summary="Delete item by id")
+@item_router.delete("/{item_id}", status_code=204, summary="Eliminar artículo por id")
 async def delete_item(item_id: str, owner_id: Optional[str] = None, session: AsyncSession = Depends(get_db)):
     item = await session.get(Item, item_id)
     if not item:
