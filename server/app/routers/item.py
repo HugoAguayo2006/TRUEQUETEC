@@ -22,17 +22,17 @@ cloudinary.config(
 @item_router.post("/upload-image", summary="Upload an image")
 async def upload_item_image(file: UploadFile = File(...)):
     if not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="File provided must be an image type.")
+        raise HTTPException(status_code=400, detail="El archivo debe ser una imagen.")
         
     try:
         upload_result = cloudinary.uploader.upload(file.file)
         secure_url = upload_result.get("secure_url")
         
         if not secure_url:
-            raise HTTPException(status_code=500, detail="Failed to retrieve URL from Cloudinary.")
+            raise HTTPException(status_code=500, detail="No se pudo obtener la URL de Cloudinary.")
         return {"image_url": secure_url}        
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Cloudinary upload error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error al subir a Cloudinary: {str(e)}")
 
 
 @item_router.get("/", response_model=List[ItemResponse], summary="Get all items")
@@ -55,7 +55,7 @@ async def get_items(skip: Optional[str] = None,
 async def get_item(item_id: str, session: AsyncSession = Depends(get_db)):
     item = await session.get(Item, item_id)
     if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(status_code=404, detail="Artículo no encontrado")
     return item
 
 @item_router.post("/", response_model=ItemResponse, status_code=201, summary="Create a new item")
@@ -72,12 +72,12 @@ async def create_item(
 async def update_item(item_id: str, data: ItemUpdate, session: AsyncSession = Depends(get_db)):
     item = await session.get(Item, item_id)
     if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(status_code=404, detail="Artículo no encontrado")
 
     item_data = data.model_dump(exclude_unset=True)
     owner_id = item_data.pop("owner_id", None)
     if owner_id and item.owner_id != owner_id:
-        raise HTTPException(status_code=403, detail="You can only update your own listings")
+        raise HTTPException(status_code=403, detail="Solo puedes actualizar tus propias publicaciones")
 
     for key, value in item_data.items():
         setattr(item, key, value)
@@ -92,9 +92,9 @@ async def update_item(item_id: str, data: ItemUpdate, session: AsyncSession = De
 async def delete_item(item_id: str, owner_id: Optional[str] = None, session: AsyncSession = Depends(get_db)):
     item = await session.get(Item, item_id)
     if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(status_code=404, detail="Artículo no encontrado")
     if owner_id and item.owner_id != owner_id:
-        raise HTTPException(status_code=403, detail="You can only delete your own listings")
+        raise HTTPException(status_code=403, detail="Solo puedes eliminar tus propias publicaciones")
 
     await session.delete(item)
     await session.commit()

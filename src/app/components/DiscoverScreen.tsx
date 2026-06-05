@@ -30,7 +30,7 @@ export default function DiscoverScreen({ onSwapRequested }: Props) {
 	if (isLoading && !items) {
 		return (
 			<div className="flex h-full items-center justify-center" style={{ background: "#080C12", color: "#7A8A9A" }}>
-				Loading items...
+				Cargando artículos...
 			</div>
 		);
 	}
@@ -47,7 +47,7 @@ export default function DiscoverScreen({ onSwapRequested }: Props) {
 		return (
 			<div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center" style={{ background: "#080C12" }}>
 				<Heart size={32} style={{ color: "#1A2230" }} />
-				<p className="text-sm" style={{ color: "#7A8A9A" }}>No more items to discover right now</p>
+				<p className="text-sm" style={{ color: "#7A8A9A" }}>No hay más artículos por descubrir por ahora</p>
 			</div>
 		);
 	}
@@ -158,7 +158,7 @@ export default function DiscoverScreen({ onSwapRequested }: Props) {
 							transform: "rotate(-12deg)",
 						}}
 					>
-						<span className="font-black text-xl tracking-widest" style={{ color: "#00CDB8" }}>WANT</span>
+						<span className="font-black text-xl tracking-widest" style={{ color: "#00CDB8" }}>QUIERO</span>
 					</div>
 
 					<div
@@ -169,7 +169,7 @@ export default function DiscoverScreen({ onSwapRequested }: Props) {
 							transform: "rotate(12deg)",
 						}}
 					>
-						<span className="font-black text-xl tracking-widest" style={{ color: "#FF3A5C" }}>PASS</span>
+						<span className="font-black text-xl tracking-widest" style={{ color: "#FF3A5C" }}>PASAR</span>
 					</div>
 
 					<div className="absolute bottom-0 left-0 right-0 p-5">
@@ -177,7 +177,7 @@ export default function DiscoverScreen({ onSwapRequested }: Props) {
 							<div>
 								<h2 className="text-white text-[22px] font-bold leading-tight mb-1">{item.title}</h2>
 								<div className="flex items-center gap-2">
-									<span className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>Owner listing</span>
+									<span className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>Publicado por su dueño</span>
 								</div>
 							</div>
 							<div className="text-right">

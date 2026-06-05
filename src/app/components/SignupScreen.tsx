@@ -28,11 +28,11 @@ export default function SignupScreen({ onSignup, onGoLogin }: Props) {
 
 	function validateAccount() {
 		const e: Partial<typeof fields> = {};
-		if (!fields.name.trim()) e.name = "Name is required";
-		if (!fields.email) e.email = "Email is required";
-		else if (!/\S+@\S+\.\S+/.test(fields.email)) e.email = "Enter a valid email";
-		if (!fields.password) e.password = "Password is required";
-		else if (fields.password.length < 6) e.password = "At least 6 characters";
+		if (!fields.name.trim()) e.name = "El nombre es obligatorio";
+		if (!fields.email) e.email = "El correo es obligatorio";
+		else if (!/\S+@\S+\.\S+/.test(fields.email)) e.email = "Ingresa un correo válido";
+		if (!fields.password) e.password = "La contraseña es obligatoria";
+		else if (fields.password.length < 6) e.password = "Mínimo 6 caracteres";
 		return e;
 	}
 
@@ -125,16 +125,16 @@ export default function SignupScreen({ onSignup, onGoLogin }: Props) {
 			{step === "account" && (
 				<div className="flex flex-col gap-5 flex-1">
 					<div>
-						<p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: "#00CDB8" }}>Step 1 of 2</p>
-						<h2 className="text-2xl font-extrabold" style={{ color: "#EEF2F7" }}>Create your account</h2>
-						<p className="text-sm mt-1" style={{ color: "#7A8A9A" }}>Join thousands of people swapping things they love</p>
+						<p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: "#00CDB8" }}>Paso 1 de 2</p>
+						<h2 className="text-2xl font-extrabold" style={{ color: "#EEF2F7" }}>Crea tu cuenta</h2>
+						<p className="text-sm mt-1" style={{ color: "#7A8A9A" }}>Únete a miles de personas que intercambian cosas que les encantan</p>
 					</div>
 
 					{(
 						[
-							{ key: "name", label: "Full name", type: "text", icon: <User size={16} />, placeholder: "Jordan Lee", autoComplete: "name" },
-							{ key: "email", label: "Email", type: "email", icon: <Mail size={16} />, placeholder: "you@example.com", autoComplete: "email" },
-							{ key: "password", label: "Password", type: showPw ? "text" : "password", icon: <Lock size={16} />, placeholder: "Min. 6 characters", autoComplete: "new-password" },
+							{ key: "name", label: "Nombre completo", type: "text", icon: <User size={16} />, placeholder: "Jordan Lee", autoComplete: "name" },
+							{ key: "email", label: "Correo", type: "email", icon: <Mail size={16} />, placeholder: "tu@ejemplo.com", autoComplete: "email" },
+							{ key: "password", label: "Contraseña", type: showPw ? "text" : "password", icon: <Lock size={16} />, placeholder: "Mínimo 6 caracteres", autoComplete: "new-password" },
 						] as const
 					).map((f) => (
 						<div key={f.key} className="flex flex-col gap-1.5">
@@ -189,11 +189,11 @@ export default function SignupScreen({ onSignup, onGoLogin }: Props) {
 							color: "#080C12",
 							boxShadow: "0 8px 24px rgba(0,205,184,0.2)",
 						}}>
-						Continue <ArrowRight size={16} />
+						Continuar <ArrowRight size={16} />
 					</button>
 					<div className="flex items-center justify-center gap-1.5 pb-8">
-						<span className="text-sm" style={{ color: "#7A8A9A" }}>Already have an account?</span>
-						<button type="button" onClick={onGoLogin} className="text-sm font-bold" style={{ color: "#00CDB8" }}>Sign in</button>
+						<span className="text-sm" style={{ color: "#7A8A9A" }}>Ya tienes cuenta?</span>
+						<button type="button" onClick={onGoLogin} className="text-sm font-bold" style={{ color: "#00CDB8" }}>Inicia sesión</button>
 					</div>
 				</div>
 			)}
@@ -202,19 +202,19 @@ export default function SignupScreen({ onSignup, onGoLogin }: Props) {
 			{step === "profile" && (
 				<div className="flex flex-col gap-5 flex-1">
 					<div>
-						<p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: "#00CDB8" }}>Step 2 of 2</p>
-						<h2 className="text-2xl font-extrabold" style={{ color: "#EEF2F7" }}>Set up your profile</h2>
-						<p className="text-sm mt-1" style={{ color: "#7A8A9A" }}>Help others trust you as a swapper</p>
+						<p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: "#00CDB8" }}>Paso 2 de 2</p>
+						<h2 className="text-2xl font-extrabold" style={{ color: "#EEF2F7" }}>Configura tu perfil</h2>
+						<p className="text-sm mt-1" style={{ color: "#7A8A9A" }}>Ayuda a que otros confíen en ti para intercambiar</p>
 					</div>
 
 					<div className="flex flex-col gap-1.5">
-						<label className="text-xs font-semibold uppercase tracking-wider px-1" style={{ color: "#7A8A9A" }}>Short bio</label>
+						<label className="text-xs font-semibold uppercase tracking-wider px-1" style={{ color: "#7A8A9A" }}>Bio corta</label>
 						<textarea
 							rows={3}
 							value={bio}
 							disabled={isLoading}
 							onChange={(e) => setBio(e.target.value)}
-							placeholder="Tell others what kinds of things you swap…"
+							placeholder="Cuéntales qué tipo de cosas intercambias..."
 							className="px-4 py-3.5 rounded-2xl text-sm resize-none outline-none transition-opacity disabled:opacity-50"
 							style={{
 								background: "#111820",
@@ -235,7 +235,7 @@ export default function SignupScreen({ onSignup, onGoLogin }: Props) {
 						{isLoading ? (
 							<div className="w-5 h-5 rounded-full border-2 border-current border-t-transparent animate-spin" />
 						) : (
-							<>Complete Sign Up <ArrowRight size={16} /></>
+							<>Completar registro <ArrowRight size={16} /></>
 						)}
 					</button>
 
@@ -246,7 +246,7 @@ export default function SignupScreen({ onSignup, onGoLogin }: Props) {
 						className="text-sm pb-8 font-medium hover:underline transition-all disabled:opacity-40"
 						style={{ color: "#4A5A6A" }}
 					>
-						Skip for now
+						Omitir por ahora
 					</button>
 				</div>
 			)}

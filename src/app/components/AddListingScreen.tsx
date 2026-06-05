@@ -33,7 +33,7 @@ export default function AddListingScreen({ onBack, onPublish, initialListing, mo
 				setPhotos((prev) => [...prev, data.image_url]);
 			}
 		} catch (err) {
-			setErrors((prev) => ({ ...prev, photos: "Failed to upload photo. Try again." }));
+			setErrors((prev) => ({ ...prev, photos: "No se pudo subir la foto. Intenta de nuevo." }));
 		}
 
 		if (fileInputRef.current) fileInputRef.current.value = "";
@@ -45,10 +45,10 @@ export default function AddListingScreen({ onBack, onPublish, initialListing, mo
 
 	function validate() {
 		const e: Record<string, string> = {};
-		if (!title.trim()) e.name = "Item name is required";
-		if (!estimated_value) e.value = "Enter an estimated value";
-		else if (isNaN(Number(estimated_value)) || Number(estimated_value) <= 0) e.value = "Enter a valid amount";
-		if (photos.length === 0) e.photos = "Add at least one photo";
+		if (!title.trim()) e.name = "El nombre del artículo es obligatorio";
+		if (!estimated_value) e.value = "Ingresa un valor estimado";
+		else if (isNaN(Number(estimated_value)) || Number(estimated_value) <= 0) e.value = "Ingresa un monto válido";
+		if (photos.length === 0) e.photos = "Agrega al menos una foto";
 		return e;
 	}
 
@@ -90,7 +90,7 @@ export default function AddListingScreen({ onBack, onPublish, initialListing, mo
 				>
 					<ArrowLeft size={17} style={{ color: "#EEF2F7" }} />
 				</button>
-				<h1 className="text-base font-bold" style={{ color: "#EEF2F7" }}>{mode === "edit" ? "Edit Listing" : "New Listing"}</h1>
+				<h1 className="text-base font-bold" style={{ color: "#EEF2F7" }}>{mode === "edit" ? "Editar publicación" : "Nueva publicación"}</h1>
 				<button
 					onClick={handlePublish}
 					disabled={!canPublish || publishing}
@@ -100,7 +100,7 @@ export default function AddListingScreen({ onBack, onPublish, initialListing, mo
 						color: canPublish ? "#080C12" : "#4A5A6A",
 					}}
 				>
-					{publishing ? "Saving..." : mode === "edit" ? "Save" : "Publish"}
+					{publishing ? "Guardando..." : mode === "edit" ? "Guardar" : "Publicar"}
 				</button>
 			</div>
 
@@ -108,7 +108,7 @@ export default function AddListingScreen({ onBack, onPublish, initialListing, mo
 				<div className="px-5 pt-5 pb-4">
 					<div className="flex items-center justify-between mb-3">
 						<p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#7A8A9A" }}>
-							Photos <span style={{ color: "#4A5A6A" }}>{photos.length}/4</span>
+							Fotos <span style={{ color: "#4A5A6A" }}>{photos.length}/4</span>
 						</p>
 						{errors.photos && <p className="text-xs" style={{ color: "#FF3A5C" }}>{errors.photos}</p>}
 					</div>
@@ -136,10 +136,10 @@ export default function AddListingScreen({ onBack, onPublish, initialListing, mo
 									)}
 								</div>
 								<span className="text-sm font-semibold" style={{ color: "#00CDB8" }}>
-									{isUploadingAsset ? "Uploading..." : "Add photo"}
+									{isUploadingAsset ? "Subiendo..." : "Agregar foto"}
 								</span>
 								{photos.length === 0 && !isUploadingAsset && (
-									<span className="text-xs" style={{ color: "#4A5A6A" }}>Tap to upload</span>
+									<span className="text-xs" style={{ color: "#4A5A6A" }}>Toca para subir</span>
 								)}
 							</button>
 						)}
@@ -150,10 +150,10 @@ export default function AddListingScreen({ onBack, onPublish, initialListing, mo
 								className="relative shrink-0 rounded-2xl overflow-hidden"
 								style={{ width: i === 0 && photos.length === 1 ? "100%" : 90, height: i === 0 && photos.length === 1 ? 200 : 90 }}
 							>
-								<img src={src} alt="Listing preview" className="w-full h-full object-cover" />
+								<img src={src} alt="Vista previa de la publicación" className="w-full h-full object-cover" />
 								{i === 0 && (
 									<div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(0,0,0,0.6)", color: "#EEF2F7" }}>
-										Cover
+										Portada
 									</div>
 								)}
 								<button
@@ -172,7 +172,7 @@ export default function AddListingScreen({ onBack, onPublish, initialListing, mo
 				<div className="px-5 flex flex-col gap-4">
 					<div className="flex flex-col gap-1.5">
 						<label className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#7A8A9A" }}>
-							Item name
+							Nombre del artículo
 						</label>
 						<div
 							className="flex items-center gap-3 px-4 py-3.5 rounded-2xl"
@@ -186,7 +186,7 @@ export default function AddListingScreen({ onBack, onPublish, initialListing, mo
 								type="text"
 								value={title}
 								onChange={(e) => setName(e.target.value)}
-								placeholder="e.g. Vintage Leica M6 Camera"
+								placeholder="Ej. Cámara Leica M6 vintage"
 								className="flex-1 bg-transparent text-sm outline-none"
 								style={{ color: "#EEF2F7", fontFamily: "inherit" }}
 							/>
@@ -196,7 +196,7 @@ export default function AddListingScreen({ onBack, onPublish, initialListing, mo
 
 					<div className="flex flex-col gap-1.5">
 						<label className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#7A8A9A" }}>
-							Estimated value
+							Valor estimado
 						</label>
 						<div
 							className="flex items-center gap-3 px-4 py-3.5 rounded-2xl"
@@ -238,7 +238,7 @@ export default function AddListingScreen({ onBack, onPublish, initialListing, mo
 						{publishing ? (
 							<div className="w-5 h-5 rounded-full border-2 border-current border-t-transparent animate-spin" />
 						) : (
-							mode === "edit" ? "Save changes" : "Publish listing"
+							mode === "edit" ? "Guardar cambios" : "Publicar artículo"
 						)}
 					</button>
 				</div>

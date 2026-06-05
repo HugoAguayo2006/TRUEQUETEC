@@ -25,7 +25,7 @@ export function useApi<T>() {
 				return result;
 			} catch (err: any) {
 				// Extracts the custom string message from your backend response or fallback text
-				const errMsg = err.message || "An unexpected error occurred.";
+				const errMsg = err.message || "Ocurrió un error inesperado.";
 				setError(errMsg);
 
 				if (options?.onError) {

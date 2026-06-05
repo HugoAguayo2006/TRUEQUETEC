@@ -3,12 +3,12 @@ import { Star, ArrowLeft, Send } from "lucide-react";
 import React from "react";
 
 const QUICK_TAGS = [
-	"Accurate description",
-	"Great communicator",
-	"Fast response",
-	"Item as expected",
-	"Would swap again",
-	"Easy meetup",
+	"Descripción precisa",
+	"Excelente comunicación",
+	"Respuesta rápida",
+	"Articulo como esperaba",
+	"Volveria a intercambiar",
+	"Entrega sencilla",
 ];
 
 interface Props {
@@ -33,18 +33,18 @@ export default function RateSwapScreen({ partner, yourItem, theirItems, onSubmit
 	function handleSubmit() {
 		if (selected === 0) return;
 		setSubmitted(true);
-		const reviewNote = [note.trim(), tags.length ? `Tags: ${tags.join(", ")}` : ""].filter(Boolean).join("\n");
+		const reviewNote = [note.trim(), tags.length ? `Etiquetas: ${tags.join(", ")}` : ""].filter(Boolean).join("\n");
 		setTimeout(() => onSubmit(selected, reviewNote), 1200);
 	}
 
 	const display = hovered || selected;
 
 	const LABELS: Record<number, { text: string; color: string }> = {
-		1: { text: "Poor", color: "#FF3A5C" },
-		2: { text: "Fair", color: "#FF8C42" },
-		3: { text: "Good", color: "#FFD166" },
-		4: { text: "Great", color: "#7EC8A4" },
-		5: { text: "Excellent", color: "#00CDB8" },
+		1: { text: "Mala", color: "#FF3A5C" },
+		2: { text: "Regular", color: "#FF8C42" },
+		3: { text: "Buena", color: "#FFD166" },
+		4: { text: "Muy buena", color: "#7EC8A4" },
+		5: { text: "Excelente", color: "#00CDB8" },
 	};
 
 	if (submitted) {
@@ -59,9 +59,9 @@ export default function RateSwapScreen({ partner, yourItem, theirItems, onSubmit
 				>
 					<Star size={36} className="fill-white text-white" />
 				</div>
-				<h2 className="text-2xl font-extrabold text-center" style={{ color: "#EEF2F7" }}>Thanks for rating!</h2>
+				<h2 className="text-2xl font-extrabold text-center" style={{ color: "#EEF2F7" }}>¡Gracias por calificar!</h2>
 				<p className="text-sm text-center" style={{ color: "#7A8A9A" }}>
-					Your review helps build trust in the Swaply community.
+					Tu reseña ayuda a generar confianza en la comunidad de Swaply.
 				</p>
 			</div>
 		);
@@ -81,10 +81,10 @@ export default function RateSwapScreen({ partner, yourItem, theirItems, onSubmit
 					<ArrowLeft size={17} style={{ color: "#EEF2F7" }} />
 				</button>
 				<p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: "#00CDB8" }}>
-					Swap complete
+					Trueque completado
 				</p>
 				<h1 className="text-2xl font-extrabold" style={{ color: "#EEF2F7" }}>
-					Rate your experience
+					Califica tu experiencia
 				</h1>
 			</div>
 
@@ -137,7 +137,7 @@ export default function RateSwapScreen({ partner, yourItem, theirItems, onSubmit
 					style={{ background: "#111820", border: "1.5px solid rgba(255,255,255,0.06)" }}
 				>
 					<p className="text-sm font-semibold" style={{ color: "#7A8A9A" }}>
-						How was your swap with {partner.name.split(" ")[0]}?
+						¿Cómo fue tu trueque con {partner.name.split(" ")[0]}?
 					</p>
 
 					<div className="flex gap-3">
@@ -183,7 +183,7 @@ export default function RateSwapScreen({ partner, yourItem, theirItems, onSubmit
 						style={{ background: "#111820", border: "1.5px solid rgba(255,255,255,0.06)" }}
 					>
 						<p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "#7A8A9A" }}>
-							What stood out? (optional)
+							¿Qué destacó? (opcional)
 						</p>
 						<div className="flex flex-wrap gap-2">
 							{QUICK_TAGS.map((tag) => {
@@ -214,12 +214,12 @@ export default function RateSwapScreen({ partner, yourItem, theirItems, onSubmit
 						style={{ background: "#111820", border: "1.5px solid rgba(255,255,255,0.06)" }}
 					>
 						<p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "#7A8A9A" }}>
-							Leave a note (optional)
+							Deja una nota (opcional)
 						</p>
 						<textarea
 							value={note}
 							onChange={(e) => setNote(e.target.value)}
-							placeholder={`Tell others about swapping with ${partner.name.split(" ")[0]}…`}
+							placeholder={`Cuéntales a otros cómo fue intercambiar con ${partner.name.split(" ")[0]}...`}
 							rows={3}
 							className="w-full text-sm rounded-xl px-4 py-3 resize-none outline-none transition-colors"
 							style={{
@@ -252,14 +252,14 @@ export default function RateSwapScreen({ partner, yourItem, theirItems, onSubmit
 					}}
 				>
 					<Send size={16} />
-					Submit Rating
+					Enviar calificación
 				</button>
 				<button
 					onClick={onSkip}
 					className="w-full py-3 text-sm font-medium"
 					style={{ color: "#4A5A6A" }}
 				>
-					Skip for now
+					Omitir por ahora
 				</button>
 			</div>
 		</div>
