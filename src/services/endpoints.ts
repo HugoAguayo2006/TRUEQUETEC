@@ -16,6 +16,8 @@ export interface ItemResponseData {
 }
 
 export const api = {
+	getUser: (user_id: string) =>
+		apiClient<any[]>(`/users/${user_id}`, { method: "POST" }),
 	getUsers: () =>
 		apiClient<any[]>("/users/", { method: "GET" }),
 	createUser: (userData: { email: string; username?: string, bio?: string }) =>

@@ -164,13 +164,11 @@ export default function DiscoverScreen({ onSwipeRight }: Props) {
 				>
 					<img src={item.image_url} alt={item.title} className="w-full h-full object-cover pointer-events-none" draggable={false} />
 
-					{/* Gradient */}
 					<div
 						className="absolute inset-0"
 						style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)" }}
 					/>
 
-					{/* WANT stamp */}
 					<div
 						className="absolute top-16 left-6 px-3 py-1 rounded-xl"
 						style={{
@@ -179,10 +177,9 @@ export default function DiscoverScreen({ onSwipeRight }: Props) {
 							transform: "rotate(-12deg)",
 						}}
 					>
-						<span className="font-black text-xl tracking-widest" style={{ color: "#00CDB8" }}>QUIERO</span>
+						<span className="font-black text-xl tracking-widest" style={{ color: "#00CDB8" }}>WANT</span>
 					</div>
 
-					{/* PASS stamp */}
 					<div
 						className="absolute top-16 right-6 px-3 py-1 rounded-xl"
 						style={{
@@ -191,10 +188,9 @@ export default function DiscoverScreen({ onSwipeRight }: Props) {
 							transform: "rotate(12deg)",
 						}}
 					>
-						<span className="font-black text-xl tracking-widest" style={{ color: "#FF3A5C" }}>PASAR</span>
+						<span className="font-black text-xl tracking-widest" style={{ color: "#FF3A5C" }}>PASS</span>
 					</div>
 
-					{/* Card info */}
 					<div className="absolute bottom-0 left-0 right-0 p-5">
 						<div className="flex items-end justify-between">
 							<div>

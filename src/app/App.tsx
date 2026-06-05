@@ -27,11 +27,10 @@ type FlowScreen =
 type NavTab = "discover" | "swaps" | "messages" | "profile";
 
 const WANTED_ITEM = {
-	name: "Leica M6 Film Camera",
-	value: 180,
-	image: "https://images.unsplash.com/photo-1452780212940-6f5c0d14d848?w=600&h=800&fit=crop",
-	owner: "Alex M.",
-	ownerAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
+	title: "Leica M6 Film Camera",
+	estimated_value: 180,
+	image_url: "https://images.unsplash.com/photo-1452780212940-6f5c0d14d848?w=600&h=800&fit=crop",
+	owner_id: "Alex M.",
 };
 
 const PROPOSER = {
@@ -41,24 +40,7 @@ const PROPOSER = {
 	swaps: 23,
 };
 
-const DEFAULT_OFFERED = [
-	{
-		id: 1,
-		name: "Polaroid Now Camera",
-		value: 110,
-		condition: "Good",
-		image: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=300&h=300&fit=crop",
-		category: "Photography",
-	},
-	{
-		id: 2,
-		name: "Vintage Turntable",
-		value: 135,
-		condition: "Very Good",
-		image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop",
-		category: "Audio",
-	},
-];
+
 
 const NAV = [
 	{ id: "discover" as NavTab, icon: Compass, label: "Discover" },
@@ -73,9 +55,9 @@ export default function App() {
 	const [tab, setTab] = useState<NavTab>("discover");
 	const [flow, setFlow] = useState<FlowScreen | null>(null);
 	const [swipedItem, setSwipedItem] = useState<typeof WANTED_ITEM | null>(null);
-	const [offeredItems, setOfferedItems] = useState(DEFAULT_OFFERED);
+	const [offeredItems, setOfferedItems] = useState([]);
 
-	function handleSwipeRight(item: typeof WANTED_ITEM) {
+	function handleSwipeRight(item) {
 		setSwipedItem(item);
 		setFlow("request-sent");
 	}
@@ -83,7 +65,7 @@ export default function App() {
 	function exitFlow() {
 		setFlow(null);
 		setSwipedItem(null);
-		setOfferedItems(DEFAULT_OFFERED);
+		setOfferedItems([]);
 	}
 
 	if (!authed) {
@@ -124,9 +106,9 @@ export default function App() {
 				{inFlow && flow === "owner-pick" && (
 					<OwnerPickScreen
 						wantedItem={WANTED_ITEM}
-						requester={{ name: "Marcus J.", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face" }}
+						requester={{ name: "" }}
 						onSendOffer={(items) => {
-							setOfferedItems(items as typeof DEFAULT_OFFERED);
+							setOfferedItems(items);
 							setFlow("exchange-proposal");
 						}}
 						onBack={() => setFlow("request-sent")}

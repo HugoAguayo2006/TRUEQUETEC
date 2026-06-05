@@ -145,15 +145,8 @@ export default function SwapsScreen({ onRate }: Props) {
 			<div className="px-5 pt-12 pb-5 shrink-0">
 				<div className="flex items-end justify-between mb-5">
 					<div>
-						<p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: "#00CDB8" }}>Your trades</p>
 						<h1 className="text-2xl font-extrabold" style={{ color: "#EEF2F7" }}>Swaps</h1>
 					</div>
-					<button
-						className="w-9 h-9 rounded-full flex items-center justify-center"
-						style={{ background: "#1A2230" }}
-					>
-						<Plus size={18} style={{ color: "#EEF2F7" }} />
-					</button>
 				</div>
 
 			</div>

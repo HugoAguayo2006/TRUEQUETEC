@@ -3,7 +3,7 @@ import { Clock } from "lucide-react";
 import React from "react";
 
 interface Props {
-	item: { name: string; value: number; image: string; owner: string; ownerAvatar: string };
+	item: { title: string; estimated_value: number; image_url: string; owner_id: string; };
 	onContinue: () => void;
 }
 
@@ -11,6 +11,7 @@ export default function RequestSentScreen({ item, onContinue }: Props) {
 	const [show, setShow] = useState(false);
 
 	useEffect(() => {
+
 		const t = setTimeout(() => setShow(true), 80);
 		return () => clearTimeout(t);
 	}, []);
@@ -53,14 +54,7 @@ export default function RequestSentScreen({ item, onContinue }: Props) {
 					className="w-36 h-36 rounded-3xl overflow-hidden shadow-2xl border-2"
 					style={{ borderColor: "rgba(0,205,184,0.4)" }}
 				>
-					<img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-				</div>
-				{/* Heart badge */}
-				<div
-					className="absolute -top-3 -right-3 w-11 h-11 rounded-full flex items-center justify-center shadow-xl"
-					style={{ background: "linear-gradient(135deg, #00CDB8, #00A896)" }}
-				>
-					<span className="text-xl">💚</span>
+					<img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
 				</div>
 			</div>
 
@@ -75,8 +69,8 @@ export default function RequestSentScreen({ item, onContinue }: Props) {
 			>
 				<h1 className="text-foreground text-2xl font-extrabold mb-2">¡Solicitud enviada!</h1>
 				<p className="text-muted-foreground text-base leading-relaxed max-w-xs">
-					Quieres <span className="text-foreground font-semibold">{item.name}</span>.<br />
-					Ya avisamos a {item.owner}; elegirá algo de tu colección para ofrecerte a cambio.
+					Quieres <span className="text-foreground font-semibold">{item.title}</span>.<br />
+					Ya avisamos a {item.owner_id}; elegirá algo de tu colección para ofrecerte a cambio.
 				</p>
 			</div>
 
@@ -90,9 +84,8 @@ export default function RequestSentScreen({ item, onContinue }: Props) {
 				}}
 			>
 				<div className="flex items-center gap-3">
-					<img src={item.ownerAvatar} alt={item.owner} className="w-10 h-10 rounded-full object-cover border border-border" />
 					<div className="flex-1">
-						<p className="text-foreground font-semibold text-sm">{item.owner}</p>
+						<p className="text-foreground font-semibold text-sm">{item.owner_id}</p>
 						<p className="text-muted-foreground text-xs">Revisando tu perfil...</p>
 					</div>
 					<div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary">
@@ -130,7 +123,6 @@ export default function RequestSentScreen({ item, onContinue }: Props) {
 				</div>
 			</div>
 
-			{/* Simulate: see the offer (demo shortcut) */}
 			<div
 				className="w-full flex flex-col gap-3"
 				style={{
@@ -147,7 +139,7 @@ export default function RequestSentScreen({ item, onContinue }: Props) {
 					Ver oferta entrante →
 				</button>
 				<p className="text-muted-foreground text-xs text-center">
-					Modo demo: simula que {item.owner} envía una oferta
+					Modo demo: simula que {item.owner_id} envía una oferta
 				</p>
 			</div>
 		</div>

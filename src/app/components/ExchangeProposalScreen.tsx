@@ -4,10 +4,9 @@ import React from "react";
 
 interface Item {
 	id: number;
-	name: string;
-	value: number;
-	condition: string;
-	image: string;
+	title: string;
+	estimated_value: number;
+	image_url: string;
 }
 
 interface Props {
@@ -31,7 +30,7 @@ export default function ExchangeProposalScreen({
 }: Props) {
 	const [tab, setTab] = useState<"offer" | "profile">("offer");
 
-	const totalOffered = offeredItems.reduce((acc, i) => acc + i.value, 0);
+	const totalOffered = offeredItems.reduce((acc, i) => acc + i.estimated_value, 0);
 	const diff = totalOffered - yourItem.value;
 	const isFavorable = diff >= -10;
 
@@ -121,13 +120,13 @@ export default function ExchangeProposalScreen({
 								{offeredItems.map((item) => (
 									<div key={item.id} className="flex items-center gap-3">
 										<div className="w-14 h-14 rounded-xl overflow-hidden shrink-0">
-											<img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+											<img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
 										</div>
 										<div className="flex-1">
-											<p className="text-foreground font-semibold text-sm">{item.name}</p>
+											<p className="text-foreground font-semibold text-sm">{item.title}</p>
 											<span className="text-muted-foreground text-xs">{item.condition}</span>
 										</div>
-										<span className="text-primary text-sm font-bold">${item.value}</span>
+										<span className="text-primary text-sm font-bold">${item.estimated_value}</span>
 									</div>
 								))}
 							</div>
