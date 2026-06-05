@@ -1,4 +1,5 @@
-const BASE_URL = "http://localhost:8000"
+export const BASE_URL = "http://localhost:8000";
+export const WS_BASE_URL = BASE_URL.replace(/^http/, "ws");
 interface RequestOptions extends RequestInit {
 	body?: any;
 }
@@ -26,10 +27,9 @@ export async function apiClient<T>(endpoint: string, options: RequestOptions = {
 	const data = isJson ? await response.json() : null;
 
 	if (!response.ok) {
-		throw new Error(data?.message || `Request failed with status ${response.status}`);
+		throw new Error(data?.detail || data?.message || `Request failed with status ${response.status}`);
 	}
 
 	return data as T;
 }
-
 

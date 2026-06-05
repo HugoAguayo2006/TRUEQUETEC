@@ -15,7 +15,7 @@ interface Props {
 	partner: { name: string; avatar: string };
 	yourItem: { name: string; image: string };
 	theirItems: { name: string; image: string }[];
-	onSubmit: (rating: number) => void;
+	onSubmit: (rating: number, note: string) => void;
 	onSkip: () => void;
 }
 
@@ -33,7 +33,8 @@ export default function RateSwapScreen({ partner, yourItem, theirItems, onSubmit
 	function handleSubmit() {
 		if (selected === 0) return;
 		setSubmitted(true);
-		setTimeout(() => onSubmit(selected), 1200);
+		const reviewNote = [note.trim(), tags.length ? `Tags: ${tags.join(", ")}` : ""].filter(Boolean).join("\n");
+		setTimeout(() => onSubmit(selected, reviewNote), 1200);
 	}
 
 	const display = hovered || selected;
@@ -92,22 +93,35 @@ export default function RateSwapScreen({ partner, yourItem, theirItems, onSubmit
 					className="rounded-2xl p-4 flex items-center gap-4"
 					style={{ background: "#111820", border: "1.5px solid rgba(255,255,255,0.06)" }}
 				>
-					<img
-						src={partner.avatar}
-						alt={partner.name}
-						className="w-12 h-12 rounded-full object-cover shrink-0"
-						style={{ border: "2px solid rgba(0,205,184,0.25)" }}
-					/>
+					{partner.avatar ? (
+						<img
+							src={partner.avatar}
+							alt={partner.name}
+							className="w-12 h-12 rounded-full object-cover shrink-0"
+							style={{ border: "2px solid rgba(0,205,184,0.25)" }}
+						/>
+					) : (
+						<div
+							className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 font-bold"
+							style={{ background: "#1A2230", color: "#00CDB8", border: "2px solid rgba(0,205,184,0.25)" }}
+						>
+							{partner.name.charAt(0).toUpperCase()}
+						</div>
+					)}
 					<div className="flex-1 min-w-0">
 						<p className="font-bold text-sm" style={{ color: "#EEF2F7" }}>{partner.name}</p>
 						<div className="flex items-center gap-2 mt-1">
 							<div className="w-8 h-8 rounded-lg overflow-hidden shrink-0">
-								<img src={yourItem.image} alt={yourItem.name} className="w-full h-full object-cover" />
+								{yourItem.image ? (
+									<img src={yourItem.image} alt={yourItem.name} className="w-full h-full object-cover" />
+								) : null}
 							</div>
 							<span style={{ color: "#7A8A9A", fontSize: 13 }}>⇄</span>
 							{theirItems.slice(0, 2).map((item, i) => (
 								<div key={i} className="w-8 h-8 rounded-lg overflow-hidden shrink-0">
-									<img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+									{item.image ? (
+										<img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+									) : null}
 								</div>
 							))}
 							{theirItems.length > 2 && (

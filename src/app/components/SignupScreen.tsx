@@ -44,7 +44,8 @@ export default function SignupScreen({ onSignup, onGoLogin }: Props) {
 					api.createUser({
 						email: fields.email,
 						username: fields.name,
-						bio: bio
+						bio: bio,
+						password: fields.password,
 					}),
 				{
 					onSuccess: (newUser) => {

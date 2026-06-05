@@ -1,18 +1,25 @@
 import { useEffect, useState } from "react";
-import { Star, ChevronRight, Plus } from "lucide-react";
+import { Star, Plus, Pencil, LogOut } from "lucide-react";
 import React from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useApi } from "../../hooks/use_api";
-import { api } from "../../services/endpoints.ts";
+import { api, ItemResponseData, SwapResponseData } from "../../services/endpoints.ts";
 import AddListingScreen from "./AddListingScreen.tsx";
 
-export default function ProfileScreen() {
+interface Props {
+	isActive?: boolean;
+}
+
+export default function ProfileScreen({ isActive = false }: Props) {
 	const [addingListing, setAddingListing] = useState(false);
+	const [editingListing, setEditingListing] = useState<ItemResponseData | null>(null);
 	const [tab, setTab] = useState<"listings" | "reviews" | "settings">("listings");
 
-	const { execute, isLoading, data: items, error } = useApi<any[]>();
-	const { execute: createNewItem, isLoading: isSavingItem } = useApi<any>();
-	const { user } = useAuth();
+	const { execute, isLoading, data: items, error } = useApi<ItemResponseData[]>();
+	const { execute: fetchSwaps, data: swaps } = useApi<SwapResponseData[]>();
+	const { execute: createNewItem } = useApi<ItemResponseData>();
+	const { execute: updateExistingItem } = useApi<ItemResponseData>();
+	const { user, logoutSession } = useAuth();
 
 	const fetchUserItems = React.useCallback(() => {
 		if (user?.id) {
@@ -20,9 +27,26 @@ export default function ProfileScreen() {
 		}
 	}, [user?.id, execute]);
 
-	useEffect(() => {
+	const fetchUserSwaps = React.useCallback(() => {
+		if (user?.id) {
+			fetchSwaps(() => api.getSwaps(user.id));
+		}
+	}, [fetchSwaps, user?.id]);
+
+	const refreshProfile = React.useCallback(() => {
 		fetchUserItems();
-	}, [fetchUserItems]);
+		fetchUserSwaps();
+	}, [fetchUserItems, fetchUserSwaps]);
+
+	useEffect(() => {
+		refreshProfile();
+	}, [refreshProfile]);
+
+	useEffect(() => {
+		if (isActive) {
+			refreshProfile();
+		}
+	}, [isActive, refreshProfile]);
 
 	async function handlePublish(listing: { title: string; value: number; image_url: string }) {
 		try {
@@ -34,10 +58,29 @@ export default function ProfileScreen() {
 			}));
 
 			setAddingListing(false);
+			setEditingListing(null);
 			setTab("listings");
 			fetchUserItems();
 		} catch (err) {
 			console.error("Failed to commit new listing asset:", err);
+		}
+	}
+
+	async function handleUpdateListing(listing: { title: string; value: number; image_url: string }) {
+		if (!editingListing || !user?.id) return;
+		try {
+			await updateExistingItem(() => api.updateItem(editingListing.id, {
+				title: listing.title,
+				estimated_value: listing.value,
+				image_url: listing.image_url,
+				owner_id: user.id,
+			}));
+
+			setEditingListing(null);
+			setTab("listings");
+			fetchUserItems();
+		} catch (err) {
+			console.error("Failed to update listing:", err);
 		}
 	}
 
@@ -48,6 +91,17 @@ export default function ProfileScreen() {
 			<AddListingScreen
 				onBack={() => setAddingListing(false)}
 				onPublish={handlePublish}
+			/>
+		);
+	}
+
+	if (editingListing) {
+		return (
+			<AddListingScreen
+				mode="edit"
+				initialListing={editingListing}
+				onBack={() => setEditingListing(null)}
+				onPublish={handleUpdateListing}
 			/>
 		);
 	}
@@ -67,12 +121,20 @@ export default function ProfileScreen() {
 							</div>
 						</div>
 					</div>
+					<button
+						onClick={logoutSession}
+						className="w-10 h-10 rounded-2xl flex items-center justify-center transition-all active:scale-95"
+						style={{ background: "#111820", color: "#FF3A5C", border: "1.5px solid rgba(255,58,92,0.18)" }}
+						title="Log out"
+					>
+						<LogOut size={17} />
+					</button>
 				</div>
 
 				{/* Stats */}
 				<div className="grid grid-cols-2 gap-2 mb-5">
 					{[
-						{ label: "Trueques", value: "18" },
+						{ label: "Trueques", value: swaps?.filter((swap) => swap.status === "completed").length || 0 },
 						{ label: "Publicados", value: isLoading ? "..." : items?.length || 0 },
 					].map((s) => (
 						<div key={s.label} className="flex flex-col items-center py-3 rounded-2xl" style={{ background: "#111820" }}>
@@ -118,10 +180,19 @@ export default function ProfileScreen() {
 									<p className="font-semibold text-sm truncate" style={{ color: "#EEF2F7" }}>{item.title}</p>
 									<div className="flex items-center gap-2 mt-1.5">
 										<span className="font-bold text-sm" style={{ color: "#00CDB8" }}>${item.estimated_value}</span>
+										{!item.is_available && (
+											<span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(56,189,248,0.12)", color: "#38BDF8" }}>
+												Swapped
+											</span>
+										)}
 									</div>
 								</div>
-								<button style={{ color: "#7A8A9A" }}>
-									<ChevronRight size={18} />
+								<button
+									onClick={() => setEditingListing(item)}
+									className="w-9 h-9 rounded-xl flex items-center justify-center"
+									style={{ color: "#00CDB8", background: "rgba(0,205,184,0.08)" }}
+								>
+									<Pencil size={16} />
 								</button>
 							</div>
 						))}

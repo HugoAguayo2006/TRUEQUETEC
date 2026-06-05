@@ -3,7 +3,7 @@ uvicorn
 sqlalchemy 
 pydantic
 scalar_fastapi
-dotenv
+python-dotenv
 aiosqlite
 sqlmodel
 cloudinary 

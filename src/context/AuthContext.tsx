@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 interface UserProfile {
 	id: string;
@@ -17,17 +17,17 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-	const [user, setUser] = useState<UserProfile | null>(null);
-	useEffect(() => {
+	const [user, setUser] = useState<UserProfile | null>(() => {
 		const storedUser = localStorage.getItem("current_user");
 		if (storedUser) {
 			try {
-				setUser(JSON.parse(storedUser));
+				return JSON.parse(storedUser);
 			} catch (e) {
 				localStorage.removeItem("current_user");
 			}
 		}
-	}, []);
+		return null;
+	});
 
 	const loginSession = (userData: UserProfile) => {
 		setUser(userData);

@@ -16,7 +16,7 @@ export default function LoginScreen({ onLogin, onGoSignup }: Props) {
 	const [showPw, setShowPw] = useState(false);
 
 	const { loginSession } = useAuth();
-	const { execute, isLoading, error, setError } = useApi<any>();
+	const { execute, isLoading, error } = useApi<any>();
 	const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
 	function validate() {
@@ -35,20 +35,14 @@ export default function LoginScreen({ onLogin, onGoSignup }: Props) {
 		setErrors({});
 
 		try {
-			// Trigger request manager layer to pull registered users
-			await execute(() => api.getUsers(), {
-				onSuccess: (allUsers: any[]) => {
-					const existingUser = allUsers.find(
-						(u) => u.email.toLowerCase() === email.toLowerCase()
-					);
-
-					if (existingUser) {
-						loginSession(existingUser)
-						onLogin();
-					} else {
-						setErrors({ email: "No account found matching this email" });
-					}
-				}
+			await execute(() => api.loginUser(email, password), {
+				onSuccess: (user) => {
+					loginSession(user);
+					onLogin();
+				},
+				onError: () => {
+					setErrors({ password: "Invalid email or password" });
+				},
 			});
 		} catch (err) {
 			// Server network error fallback handling
