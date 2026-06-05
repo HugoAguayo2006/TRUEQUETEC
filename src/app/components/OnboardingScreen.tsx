@@ -36,7 +36,7 @@ export default function OnboardingScreen({ onLogin, onSignup }: Props) {
 							<circle cx="14" cy="14" r="2.5" fill="white" />
 						</svg>
 					</div>
-					<span className="text-lg font-extrabold tracking-tight text-white">Swaply</span>
+					<span className="text-lg font-extrabold tracking-tight text-white">TRUEQUETEC</span>
 				</div>
 			</div>
 

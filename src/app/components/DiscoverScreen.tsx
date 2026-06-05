@@ -118,7 +118,7 @@ export default function DiscoverScreen({ onSwapRequested }: Props) {
 		<div className="flex flex-col h-full" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#080C12" }}>
 			<div className="flex items-center justify-between px-5 pt-12 pb-4 shrink-0">
 				<div className="flex flex-col items-center">
-					<span className="text-lg font-extrabold tracking-tight" style={{ color: "#EEF2F7" }}>Swaply</span>
+					<span className="text-lg font-extrabold tracking-tight" style={{ color: "#EEF2F7" }}>TRUEQUETEC</span>
 				</div>
 			</div>
 
