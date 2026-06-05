@@ -335,7 +335,7 @@ export default function ProfileScreen() {
             </div>
 
             <p className="text-center text-xs pt-4" style={{ color: "#3A4A5A" }}>
-              Swaply v1.0.0 · Términos · Privacidad
+              TRUEQUETEC v1.0.0 · Términos · Privacidad
             </p>
           </div>
         )}
