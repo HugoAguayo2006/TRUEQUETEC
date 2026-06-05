@@ -183,7 +183,7 @@ export default function DiscoverScreen({ onSwipeRight }: Props) {
         </button>
 
         <div className="flex flex-col items-center">
-          <span className="text-lg font-extrabold tracking-tight" style={{ color: "#EEF2F7" }}>Swaply</span>
+          <span className="text-lg font-extrabold tracking-tight" style={{ color: "#EEF2F7" }}>TRUEQUETEC</span>
         </div>
 
         <div className="relative">
