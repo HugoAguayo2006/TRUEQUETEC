@@ -47,7 +47,7 @@ export default function DiscoverScreen({ onSwapRequested }: Props) {
 		return (
 			<div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center" style={{ background: "#080C12" }}>
 				<Heart size={32} style={{ color: "#1A2230" }} />
-				<p className="text-sm" style={{ color: "#7A8A9A" }}>No hay más artículos por descubrir ahora</p>
+				<p className="text-sm" style={{ color: "#7A8A9A" }}>No hay más artículos por descubrir por ahora</p>
 			</div>
 		);
 	}
@@ -158,7 +158,7 @@ export default function DiscoverScreen({ onSwapRequested }: Props) {
 							transform: "rotate(-12deg)",
 						}}
 					>
-						<span className="font-black text-xl tracking-widest" style={{ color: "#00CDB8" }}>ME INTERESA</span>
+						<span className="font-black text-xl tracking-widest" style={{ color: "#00CDB8" }}>QUIERO</span>
 					</div>
 
 					<div

@@ -27,7 +27,7 @@ export async function apiClient<T>(endpoint: string, options: RequestOptions = {
 	const data = isJson ? await response.json() : null;
 
 	if (!response.ok) {
-		throw new Error(data?.detail || data?.message || `La solicitud falló con el estado ${response.status}`);
+		throw new Error(data?.detail || data?.message || `La solicitud falló con estado ${response.status}`);
 	}
 
 	return data as T;
