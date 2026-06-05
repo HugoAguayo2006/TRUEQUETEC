@@ -1,17 +1,35 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "http://localhost:8000";
-
-export async function apiGet<T>(path: string): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`);
-  const payload = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    const detail =
-      payload && typeof payload === "object" && "detail" in payload
-        ? String(payload.detail)
-        : "API request failed";
-    throw new Error(detail);
-  }
-
-  return payload as T;
+export const BASE_URL = "http://localhost:8000";
+export const WS_BASE_URL = BASE_URL.replace(/^http/, "ws");
+interface RequestOptions extends RequestInit {
+	body?: any;
 }
+
+export async function apiClient<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+	const userId = localStorage.getItem("current_user_id");
+	const isFormData = options.body instanceof FormData;
+	const headers: HeadersInit = {
+		...(isFormData ? {} : { "Content-Type": "application/json" }),
+		...(userId ? { "X-User-Id": userId } : {}),
+		...options.headers,
+	};
+
+	const config: RequestInit = {
+		...options,
+		headers,
+		body: isFormData ? (options.body as FormData) :
+			options.body ? JSON.stringify(options.body) : undefined,
+	};
+
+	const response = await fetch(`${BASE_URL}${endpoint}`, config);
+
+	// empty responses safely
+	const isJson = response.headers.get("content-type")?.includes("application/json");
+	const data = isJson ? await response.json() : null;
+
+	if (!response.ok) {
+		throw new Error(data?.detail || data?.message || `La solicitud falló con estado ${response.status}`);
+	}
+
+	return data as T;
+}
+

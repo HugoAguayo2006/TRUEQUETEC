@@ -1,3 +1,10 @@
-fastapi
-uvicorn
-certifi
+fastapi 
+uvicorn 
+sqlalchemy 
+pydantic
+scalar_fastapi
+python-dotenv
+aiosqlite
+sqlmodel
+cloudinary 
+python-multipart
