@@ -17,17 +17,29 @@ function formatRelative(value: string) {
   if (Number.isNaN(date.getTime())) return "";
   const diffMs = Date.now() - date.getTime();
   const mins = Math.floor(diffMs / 60000);
-  if (mins < 1) return "Just now";
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return "Ahora";
+  if (mins < 60) return `Hace ${mins} min`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
+  if (hours < 24) return `Hace ${hours} h`;
+  return `Hace ${Math.floor(hours / 24)} d`;
 }
 
 function offeredLabel(swap: SwapResponseData) {
-  if (!swap.offered_items.length) return "No offer selected yet";
+  if (!swap.offered_items.length) return "Aun no hay oferta seleccionada";
   if (swap.offered_items.length === 1) return swap.offered_items[0].title;
-  return `${swap.offered_items.length} offered items`;
+  return `${swap.offered_items.length} artículos ofrecidos`;
+}
+
+function statusLabel(status: SwapResponseData["status"]) {
+  const labels: Record<SwapResponseData["status"], string> = {
+    pending: "Pendiente",
+    awaiting: "Esperando respuesta",
+    accepted: "Aceptado",
+    countered: "Contraoferta",
+    completed: "Completado",
+    declined: "Rechazado",
+  };
+  return labels[status] || status;
 }
 
 function money(value: number) {
@@ -106,7 +118,7 @@ export default function MessagesScreen() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-bold text-sm" style={{ color: "#EEF2F7" }}>{openSwap.partner.username}</p>
-            <p className="text-xs" style={{ color: "#7A8A9A" }}>{openSwap.status}</p>
+            <p className="text-xs" style={{ color: "#7A8A9A" }}>{statusLabel(openSwap.status)}</p>
           </div>
           <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl shrink-0" style={{ background: "#1A2230" }}>
             <div className="w-6 h-6 rounded-lg overflow-hidden shrink-0">
@@ -128,7 +140,7 @@ export default function MessagesScreen() {
             onClick={() => setShowSwapDetails((value) => !value)}
             className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
             style={{ background: "rgba(0,205,184,0.1)", color: "#00CDB8" }}
-            aria-label={showSwapDetails ? "Hide swap details" : "Show swap details"}
+            aria-label={showSwapDetails ? "Ocultar detalles del trueque" : "Mostrar detalles del trueque"}
           >
             {showSwapDetails ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
@@ -138,11 +150,11 @@ export default function MessagesScreen() {
           <div className="mx-4 mt-2 rounded-2xl overflow-hidden shrink-0" style={{ background: "#111820", border: "1px solid rgba(255,255,255,0.06)" }}>
             <div className="p-3 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#7A8A9A" }}>Swap status</p>
-                <p className="text-sm font-bold capitalize" style={{ color: "#EEF2F7" }}>{openSwap.status.replace("-", " ")}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#7A8A9A" }}>Estado del trueque</p>
+                <p className="text-sm font-bold capitalize" style={{ color: "#EEF2F7" }}>{statusLabel(openSwap.status)}</p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#7A8A9A" }}>Difference</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#7A8A9A" }}>Diferencia</p>
                 <p className="text-sm font-bold" style={{ color: valueDiff >= 0 ? "#00CDB8" : "#FF3A5C" }}>
                   {valueDiff >= 0 ? "+" : "-"}{money(Math.abs(valueDiff))}
                 </p>
@@ -150,7 +162,7 @@ export default function MessagesScreen() {
             </div>
 
             <div className="p-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-              <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "#7A8A9A" }}>Requested item</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "#7A8A9A" }}>Artículo solicitado</p>
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0" style={{ background: "#1A2230" }}>
                   {openSwap.wanted_item.image_url && <img src={openSwap.wanted_item.image_url} alt={openSwap.wanted_item.title} className="w-full h-full object-cover" />}
@@ -163,13 +175,13 @@ export default function MessagesScreen() {
             <div className="p-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#7A8A9A" }}>
-                  Offered items ({openSwap.offered_items.length})
+                  Artículos ofrecidos ({openSwap.offered_items.length})
                 </p>
                 <span className="text-xs font-bold" style={{ color: "#EEF2F7" }}>{money(offeredTotal)}</span>
               </div>
 
               {openSwap.offered_items.length === 0 ? (
-                <p className="text-sm" style={{ color: "#7A8A9A" }}>No offer selected yet.</p>
+                <p className="text-sm" style={{ color: "#7A8A9A" }}>Aun no hay oferta seleccionada.</p>
               ) : (
                 <div className="flex flex-col gap-2">
                   {openSwap.offered_items.map((item) => (
@@ -217,7 +229,7 @@ export default function MessagesScreen() {
             );
           })}
           {!messages?.length && (
-            <p className="text-sm text-center py-10" style={{ color: "#7A8A9A" }}>No messages yet</p>
+            <p className="text-sm text-center py-10" style={{ color: "#7A8A9A" }}>Aun no hay mensajes</p>
           )}
         </div>
 
@@ -273,9 +285,9 @@ export default function MessagesScreen() {
 
       <div className="flex-1 overflow-y-auto px-5 pb-6 flex flex-col gap-2">
         {error && <p className="text-xs text-center" style={{ color: "#FF3A5C" }}>{error}</p>}
-        {isLoading && !swaps && <p className="text-sm text-center py-12" style={{ color: "#7A8A9A" }}>Loading messages...</p>}
+        {isLoading && !swaps && <p className="text-sm text-center py-12" style={{ color: "#7A8A9A" }}>Cargando mensajes...</p>}
         {!isLoading && conversations.length === 0 && (
-          <p className="text-sm text-center py-12" style={{ color: "#7A8A9A" }}>No swap conversations yet</p>
+          <p className="text-sm text-center py-12" style={{ color: "#7A8A9A" }}>Aun no hay conversaciones de trueques</p>
         )}
 
         {conversations.map((swap) => {
