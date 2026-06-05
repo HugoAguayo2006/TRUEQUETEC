@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useApi } from "../../hooks/use_api";
 import { api, ItemResponseData, SwapResponseData } from "../../services/endpoints.ts";
 import AddListingScreen from "./AddListingScreen.tsx";
+import ProductPrice from "./ProductPrice.tsx";
 
 interface Props {
 	isActive?: boolean;
@@ -179,7 +180,7 @@ export default function ProfileScreen({ isActive = false }: Props) {
 								<div className="flex-1 min-w-0">
 									<p className="font-semibold text-sm truncate" style={{ color: "#EEF2F7" }}>{item.title}</p>
 									<div className="flex items-center gap-2 mt-1.5">
-										<span className="font-bold text-sm" style={{ color: "#00CDB8" }}>${item.estimated_value}</span>
+										<ProductPrice productName={item.title} userValue={item.estimated_value} variant="inline" />
 										{!item.is_available && (
 											<span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(56,189,248,0.12)", color: "#38BDF8" }}>
 												Intercambiado

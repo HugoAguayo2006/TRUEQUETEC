@@ -8,3 +8,4 @@ aiosqlite
 sqlmodel
 cloudinary 
 python-multipart
+certifi

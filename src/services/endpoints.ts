@@ -60,6 +60,23 @@ export interface SwapResponseData {
 	last_message?: MessageResponseData | null;
 }
 
+export interface PricingStoreData {
+	title: string;
+	store: string;
+	price: number;
+	link: string;
+}
+
+export interface PricingEstimateData {
+	query: string;
+	currency: string;
+	count: number;
+	minimum: number;
+	average: number;
+	maximum: number;
+	stores: PricingStoreData[];
+}
+
 export const api = {
 	getUser: (user_id: string) =>
 		apiClient<UserResponseData>(`/users/${user_id}`, { method: "GET" }),
@@ -159,5 +176,10 @@ export const api = {
 		apiClient<SwapRatingResponseData>(`/swaps/${swapId}/ratings`, {
 			method: "POST",
 			body: { rater_id: raterId, rating, note },
+		}),
+
+	estimateProductPrice: (productName: string) =>
+		apiClient<PricingEstimateData>(`/pricing/estimate?q=${encodeURIComponent(productName)}`, {
+			method: "GET",
 		}),
 }

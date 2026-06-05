@@ -3,6 +3,7 @@ import { LogOut, RefreshCw, ShieldCheck, Trash2 } from "lucide-react";
 import React from "react";
 import { useAuth } from "../../context/AuthContext";
 import { api, ItemResponseData, UserResponseData } from "../../services/endpoints";
+import ProductPrice from "./ProductPrice";
 
 export default function AdminScreen() {
 	const { user, logoutSession } = useAuth();
@@ -144,7 +145,9 @@ export default function AdminScreen() {
 										<p className="text-xs truncate mt-1" style={{ color: "#7A8A9A" }}>
 											{owner?.username || "Usuario desconocido"} · {owner?.email || item.owner_id}
 										</p>
-										<p className="text-sm font-extrabold mt-1" style={{ color: "#00CDB8" }}>${item.estimated_value}</p>
+										<div className="mt-1">
+											<ProductPrice productName={item.title} userValue={item.estimated_value} variant="inline" />
+										</div>
 									</div>
 									<button
 										onClick={() => setPendingDelete(item)}
