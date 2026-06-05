@@ -17,7 +17,7 @@ function formatRelative(value: string) {
   if (Number.isNaN(date.getTime())) return "";
   const diffMs = Date.now() - date.getTime();
   const mins = Math.floor(diffMs / 60000);
-  if (mins < 1) return "Ahora mismo";
+  if (mins < 1) return "Ahora";
   if (mins < 60) return `Hace ${mins} min`;
   const hours = Math.floor(mins / 60);
   if (hours < 24) return `Hace ${hours} h`;
@@ -25,9 +25,21 @@ function formatRelative(value: string) {
 }
 
 function offeredLabel(swap: SwapResponseData) {
-  if (!swap.offered_items.length) return "Aún no hay oferta seleccionada";
+  if (!swap.offered_items.length) return "Aun no hay oferta seleccionada";
   if (swap.offered_items.length === 1) return swap.offered_items[0].title;
   return `${swap.offered_items.length} artículos ofrecidos`;
+}
+
+function statusLabel(status: SwapResponseData["status"]) {
+  const labels: Record<SwapResponseData["status"], string> = {
+    pending: "Pendiente",
+    awaiting: "Esperando respuesta",
+    accepted: "Aceptado",
+    countered: "Contraoferta",
+    completed: "Completado",
+    declined: "Rechazado",
+  };
+  return labels[status] || status;
 }
 
 function money(value: number) {
@@ -151,7 +163,7 @@ export default function MessagesScreen() {
             <div className="p-3 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#7A8A9A" }}>Estado del trueque</p>
-                <p className="text-sm font-bold" style={{ color: "#EEF2F7" }}>{statusLabel(openSwap.status)}</p>
+                <p className="text-sm font-bold capitalize" style={{ color: "#EEF2F7" }}>{statusLabel(openSwap.status)}</p>
               </div>
               <div className="text-right">
                 <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#7A8A9A" }}>Diferencia</p>
@@ -162,7 +174,7 @@ export default function MessagesScreen() {
             </div>
 
             <div className="p-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-              <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "#7A8A9A" }}>Artículo solicitado</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "#7A8A9A" }}>Artículo solicitado</p>
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0" style={{ background: "#1A2230" }}>
                   {openSwap.wanted_item.image_url && <img src={openSwap.wanted_item.image_url} alt={openSwap.wanted_item.title} className="w-full h-full object-cover" />}
@@ -181,7 +193,7 @@ export default function MessagesScreen() {
               </div>
 
               {openSwap.offered_items.length === 0 ? (
-                <p className="text-sm" style={{ color: "#7A8A9A" }}>Aún no hay oferta seleccionada.</p>
+                <p className="text-sm" style={{ color: "#7A8A9A" }}>Aun no hay oferta seleccionada.</p>
               ) : (
                 <div className="flex flex-col gap-2">
                   {openSwap.offered_items.map((item) => (
@@ -229,7 +241,7 @@ export default function MessagesScreen() {
             );
           })}
           {!messages?.length && (
-            <p className="text-sm text-center py-10" style={{ color: "#7A8A9A" }}>Aún no hay mensajes</p>
+            <p className="text-sm text-center py-10" style={{ color: "#7A8A9A" }}>Aun no hay mensajes</p>
           )}
         </div>
 
@@ -287,7 +299,7 @@ export default function MessagesScreen() {
         {error && <p className="text-xs text-center" style={{ color: "#FF3A5C" }}>{error}</p>}
         {isLoading && !swaps && <p className="text-sm text-center py-12" style={{ color: "#7A8A9A" }}>Cargando mensajes...</p>}
         {!isLoading && conversations.length === 0 && (
-          <p className="text-sm text-center py-12" style={{ color: "#7A8A9A" }}>Aún no hay conversaciones de trueque</p>
+          <p className="text-sm text-center py-12" style={{ color: "#7A8A9A" }}>Aun no hay conversaciones de trueques</p>
         )}
 
         {conversations.map((swap) => {

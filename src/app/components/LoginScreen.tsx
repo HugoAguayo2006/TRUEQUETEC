@@ -24,7 +24,7 @@ export default function LoginScreen({ onLogin, onGoSignup }: Props) {
 		if (!email) e.email = "El correo es obligatorio";
 		else if (!/\S+@\S+\.\S+/.test(email)) e.email = "Ingresa un correo válido";
 		if (!password) e.password = "La contraseña es obligatoria";
-		else if (password.length < 6) e.password = "Debe tener al menos 6 caracteres";
+		else if (password.length < 6) e.password = "Mínimo 6 caracteres";
 		return e;
 	}
 
@@ -73,12 +73,12 @@ export default function LoginScreen({ onLogin, onGoSignup }: Props) {
 					</svg>
 				</div>
 				<h1 className="text-2xl font-extrabold tracking-tight" style={{ color: "#EEF2F7" }}>Swaply</h1>
-				<p className="text-sm mt-1" style={{ color: "#7A8A9A" }}>Intercambia cosas que amas</p>
+				<p className="text-sm mt-1" style={{ color: "#7A8A9A" }}>Intercambia cosas que te encantan</p>
 			</div>
 
 			<form onSubmit={handleSubmit} className="flex flex-col gap-4 flex-1">
 				<div>
-					<h2 className="text-xl font-extrabold mb-1" style={{ color: "#EEF2F7" }}>Bienvenido de nuevo</h2>
+					<h2 className="text-xl font-extrabold mb-1" style={{ color: "#EEF2F7" }}>Qué bueno verte de nuevo</h2>
 					<p className="text-sm" style={{ color: "#7A8A9A" }}>Inicia sesión para seguir intercambiando</p>
 				</div>
 
@@ -158,7 +158,7 @@ export default function LoginScreen({ onLogin, onGoSignup }: Props) {
 				</button>
 
 				<div className="flex items-center justify-center gap-1.5 pb-8 mt-auto pt-4">
-					<span className="text-sm" style={{ color: "#7A8A9A" }}>¿No tienes cuenta?</span>
+					<span className="text-sm" style={{ color: "#7A8A9A" }}>No tienes cuenta?</span>
 					<button type="button" onClick={onGoSignup} className="text-sm font-bold" style={{ color: "#00CDB8" }}>
 						Regístrate
 					</button>

@@ -94,7 +94,7 @@ async def _get_swap_response(
         partner_id = swap.requester_id
     partner = await session.get(User, partner_id)
     if not partner:
-        raise HTTPException(status_code=404, detail="Persona del trueque no encontrada")
+        raise HTTPException(status_code=404, detail="Usuario del trueque no encontrado")
 
     result = await session.execute(
         select(Message)
@@ -212,7 +212,7 @@ async def update_swap_status(
 ):
     allowed_statuses = {"pending", "awaiting", "accepted", "countered", "completed", "declined"}
     if data.status not in allowed_statuses:
-        raise HTTPException(status_code=400, detail="Estado de trueque inválido")
+        raise HTTPException(status_code=400, detail="Estado de trueque no válido")
 
     swap = await session.get(Swap, swap_id)
     if not swap:
@@ -222,11 +222,11 @@ async def update_swap_status(
         if swap.status != "awaiting":
             raise HTTPException(status_code=400, detail="Solo se pueden aceptar trueques con una oferta")
         if not _parse_item_ids(swap.offered_item_ids):
-            raise HTTPException(status_code=400, detail="No se puede aceptar un trueque sin artículos ofrecidos")
+            raise HTTPException(status_code=400, detail="No puedes aceptar un trueque sin artículos ofrecidos")
         await _transfer_swap_items(swap, session)
 
     if data.status == "completed" and swap.status != "accepted":
-        raise HTTPException(status_code=400, detail="Solo se pueden confirmar como recibidos los trueques aceptados")
+        raise HTTPException(status_code=400, detail="Solo los trueques aceptados se pueden confirmar como recibidos")
 
     swap.status = data.status
     swap.updated_at = datetime.now(timezone.utc)
@@ -258,7 +258,7 @@ async def create_message(
     if not swap:
         raise HTTPException(status_code=404, detail="Trueque no encontrado")
     if data.sender_id not in {swap.requester_id, swap.owner_id}:
-        raise HTTPException(status_code=403, detail="Quien envía el mensaje no forma parte de este trueque")
+        raise HTTPException(status_code=403, detail="El remitente no forma parte de este trueque")
     if not data.body.strip():
         raise HTTPException(status_code=400, detail="El mensaje no puede estar vacío")
 

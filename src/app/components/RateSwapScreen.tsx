@@ -4,11 +4,11 @@ import React from "react";
 
 const QUICK_TAGS = [
 	"Descripción precisa",
-	"Buena comunicación",
+	"Excelente comunicación",
 	"Respuesta rápida",
-	"Artículo como se esperaba",
-	"Volvería a intercambiar",
-	"Encuentro sencillo",
+	"Articulo como esperaba",
+	"Volveria a intercambiar",
+	"Entrega sencilla",
 ];
 
 interface Props {

@@ -33,7 +33,7 @@ export default function AddListingScreen({ onBack, onPublish, initialListing, mo
 				setPhotos((prev) => [...prev, data.image_url]);
 			}
 		} catch (err) {
-			setErrors((prev) => ({ ...prev, photos: "No se pudo subir la foto. Inténtalo de nuevo." }));
+			setErrors((prev) => ({ ...prev, photos: "No se pudo subir la foto. Intenta de nuevo." }));
 		}
 
 		if (fileInputRef.current) fileInputRef.current.value = "";
@@ -238,7 +238,7 @@ export default function AddListingScreen({ onBack, onPublish, initialListing, mo
 						{publishing ? (
 							<div className="w-5 h-5 rounded-full border-2 border-current border-t-transparent animate-spin" />
 						) : (
-							mode === "edit" ? "Guardar cambios" : "Publicar"
+							mode === "edit" ? "Guardar cambios" : "Publicar artículo"
 						)}
 					</button>
 				</div>

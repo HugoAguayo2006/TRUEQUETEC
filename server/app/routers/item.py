@@ -29,10 +29,10 @@ async def upload_item_image(file: UploadFile = File(...)):
         secure_url = upload_result.get("secure_url")
         
         if not secure_url:
-            raise HTTPException(status_code=500, detail="No se pudo recuperar la URL de Cloudinary.")
+            raise HTTPException(status_code=500, detail="No se pudo obtener la URL de Cloudinary.")
         return {"image_url": secure_url}        
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error al subir la imagen a Cloudinary: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error al subir a Cloudinary: {str(e)}")
 
 
 @item_router.get("/", response_model=List[ItemResponse], summary="Obtener todos los artículos")

@@ -39,7 +39,7 @@ const STATUS_META: Record<SwapStatus, { label: string; color: string; bg: string
 		icon: <RefreshCw size={11} />,
 	},
 	accepted: {
-		label: "Esperando recepción",
+		label: "Esperando entrega",
 		color: "#38BDF8",
 		bg: "rgba(56,189,248,0.1)",
 		icon: <Clock size={11} />,
@@ -67,7 +67,7 @@ function formatSwapTime(value: string) {
 	if (Number.isNaN(date.getTime())) return "";
 	const diffMs = Date.now() - date.getTime();
 	const mins = Math.floor(diffMs / 60000);
-	if (mins < 1) return "Ahora mismo";
+	if (mins < 1) return "Ahora";
 	if (mins < 60) return `Hace ${mins} min`;
 	const hours = Math.floor(mins / 60);
 	if (hours < 24) return `Hace ${hours} h`;
@@ -242,7 +242,7 @@ export default function SwapsScreen({ onRate }: Props) {
 					{selectedOfferIds.length > 0 && (
 						<div className="flex items-center justify-between mb-3">
 							<span className="text-sm" style={{ color: "#7A8A9A" }}>
-								{selectedOfferIds.length} seleccionados · ${selectedValue}
+								{selectedOfferIds.length} seleccionados - ${selectedValue}
 							</span>
 							<span className="text-sm font-semibold" style={{ color: diff >= 0 ? "#00CDB8" : "#FF3A5C" }}>
 								{diff >= 0 ? "+" : "-"}${Math.abs(diff)}
@@ -293,7 +293,7 @@ export default function SwapsScreen({ onRate }: Props) {
 				{shown.length === 0 && !isLoading && (
 					<div className="flex flex-col items-center justify-center flex-1 gap-3 py-20" style={{ color: "#7A8A9A" }}>
 						<RefreshCw size={32} style={{ color: "#1A2230" }} />
-						<p className="text-sm">{filter === "active" ? "Aún no hay trueques activos" : "Aún no hay historial"}</p>
+						<p className="text-sm">{filter === "active" ? "Aun no tienes trueques activos" : "Aun no tienes historial"}</p>
 					</div>
 				)}
 
@@ -452,7 +452,7 @@ export default function SwapsScreen({ onRate }: Props) {
 									className="flex w-full items-center justify-center gap-1.5 mt-3 pt-3 font-semibold text-sm"
 									style={{ borderTop: "1px solid rgba(56,189,248,0.18)", color: "#38BDF8" }}
 								>
-									Confirmar recepción <CheckCircle size={15} />
+									Confirmar recibido <CheckCircle size={15} />
 								</button>
 							)}
 
