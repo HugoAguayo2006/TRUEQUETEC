@@ -7,13 +7,15 @@ import { useApi } from "../../hooks/use_api";
 interface Props {
 	onBack: () => void;
 	onPublish: (listing: { title: string; value: number; image_url: string }) => void;
+	initialListing?: { title: string; estimated_value: number; image_url: string };
+	mode?: "create" | "edit";
 }
 
-export default function AddListingScreen({ onBack, onPublish }: Props) {
+export default function AddListingScreen({ onBack, onPublish, initialListing, mode = "create" }: Props) {
 	const fileInputRef = useRef<HTMLInputElement>(null);
-	const [photos, setPhotos] = useState<string[]>([]);
-	const [title, setName] = useState("");
-	const [estimated_value, setValue] = useState("");
+	const [photos, setPhotos] = useState<string[]>(initialListing?.image_url ? [initialListing.image_url] : []);
+	const [title, setName] = useState(initialListing?.title || "");
+	const [estimated_value, setValue] = useState(initialListing?.estimated_value ? String(initialListing.estimated_value) : "");
 	const [publishing, setPublishing] = useState(false);
 	const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -88,7 +90,7 @@ export default function AddListingScreen({ onBack, onPublish }: Props) {
 				>
 					<ArrowLeft size={17} style={{ color: "#EEF2F7" }} />
 				</button>
-				<h1 className="text-base font-bold" style={{ color: "#EEF2F7" }}>New Listing</h1>
+				<h1 className="text-base font-bold" style={{ color: "#EEF2F7" }}>{mode === "edit" ? "Edit Listing" : "New Listing"}</h1>
 				<button
 					onClick={handlePublish}
 					disabled={!canPublish || publishing}
@@ -98,7 +100,7 @@ export default function AddListingScreen({ onBack, onPublish }: Props) {
 						color: canPublish ? "#080C12" : "#4A5A6A",
 					}}
 				>
-					{publishing ? "Publishing…" : "Publish"}
+					{publishing ? "Saving..." : mode === "edit" ? "Save" : "Publish"}
 				</button>
 			</div>
 
@@ -236,7 +238,7 @@ export default function AddListingScreen({ onBack, onPublish }: Props) {
 						{publishing ? (
 							<div className="w-5 h-5 rounded-full border-2 border-current border-t-transparent animate-spin" />
 						) : (
-							"Publish listing"
+							mode === "edit" ? "Save changes" : "Publish listing"
 						)}
 					</button>
 				</div>

@@ -1,82 +1,56 @@
 import { useState, useRef, useEffect } from "react";
 import { X, Heart } from "lucide-react";
 import React from "react";
-import { api } from "../../services/endpoints";
+import { api, ItemResponseData, SwapResponseData } from "../../services/endpoints";
 import { useApi } from "../../hooks/use_api";
 import { useAuth } from "../../context/AuthContext";
 
-const items = [
-	{
-		id: 1,
-		name: "Cámara analógica Leica M6",
-		value: 180,
-		condition: "Buen estado",
-		owner: "Alex M.",
-		ownerAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
-		image: "https://images.unsplash.com/photo-1452780212940-6f5c0d14d848?w=600&h=900&fit=crop",
-		category: "Fotografía",
-		description: "Telémetro clásico en excelente funcionamiento. Incluye correa de piel y lente de 50 mm.",
-		tags: ["Vintage", "Analógica"],
-	},
-	{
-		id: 2,
-		name: "Audífonos Bose QC45",
-		value: 150,
-		condition: "Como nuevo",
-		owner: "Sara K.",
-		ownerAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face",
-		image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=900&fit=crop",
-		category: "Audio",
-		description: "Usados solo dos veces. Incluye estuche original, cables y documentación.",
-		tags: ["Inalámbrico", "Premium"],
-	},
-	{
-		id: 3,
-		name: "Bolso mensajero de piel",
-		value: 95,
-		condition: "Muy buen estado",
-		owner: "Tom R.",
-		ownerAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face",
-		image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&h=900&fit=crop",
-		category: "Moda",
-		description: "Piel de grano completo. Cabe una laptop de 15 pulgadas. Herrajes de latón.",
-		tags: ["Piel", "Diario"],
-	},
-	{
-		id: 4,
-		name: "HHKB Pro Hybrid",
-		value: 210,
-		condition: "Como nuevo",
-		owner: "Ji-Ho L.",
-		ownerAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face",
-		image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&h=900&fit=crop",
-		category: "Tecnología",
-		description: "Switches Topre de 45 g. Bluetooth + USB-C. Casi sin uso.",
-		tags: ["Mecánico", "Inalámbrico"],
-	},
-];
-
 interface Props {
-	onSwipeRight: (item: typeof items[0]) => void;
+	onSwapRequested?: (swap: SwapResponseData) => void;
 }
 
-export default function DiscoverScreen({ onSwipeRight }: Props) {
+export default function DiscoverScreen({ onSwapRequested }: Props) {
 	const [currentIdx, setCurrentIdx] = useState(0);
 	const [dragX, setDragX] = useState(0);
 	const [isDragging, setIsDragging] = useState(false);
 	const [exiting, setExiting] = useState<"left" | "right" | null>(null);
 	const dragStartX = useRef(0);
 
-	const { user } = useAuth()
-	if (!user) return
-
-	const { execute, isLoading, data: items, error } = useApi<any[]>();
+	const { user } = useAuth();
+	const { execute, isLoading, data: items, error } = useApi<ItemResponseData[]>();
+	const { execute: createSwap, isLoading: isCreatingSwap } = useApi<SwapResponseData>();
 	const fetch_items = React.useCallback(() => {
-		execute(() => api.getItems(user.id));
-	}, [execute])
+		if (user?.id) execute(() => api.getItems(user.id));
+	}, [execute, user?.id]);
 
 	useEffect(() => { fetch_items(); }, [fetch_items])
-	if (!items) return
+
+	if (!user) return null;
+
+	if (isLoading && !items) {
+		return (
+			<div className="flex h-full items-center justify-center" style={{ background: "#080C12", color: "#7A8A9A" }}>
+				Loading items...
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="flex h-full items-center justify-center px-6 text-center" style={{ background: "#080C12", color: "#FF3A5C" }}>
+				{error}
+			</div>
+		);
+	}
+
+	if (!items?.length || currentIdx >= items.length) {
+		return (
+			<div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center" style={{ background: "#080C12" }}>
+				<Heart size={32} style={{ color: "#1A2230" }} />
+				<p className="text-sm" style={{ color: "#7A8A9A" }}>No more items to discover right now</p>
+			</div>
+		);
+	}
 
 	const item = items[currentIdx];
 	const nextItem = items[currentIdx + 1];
@@ -102,14 +76,21 @@ export default function DiscoverScreen({ onSwipeRight }: Props) {
 	}
 
 
-	function triggerLike() {
+	async function triggerLike() {
+		if (isCreatingSwap) return;
 		setExiting("right");
-		setTimeout(() => {
-			onSwipeRight(item);
+		try {
+			const swap = await createSwap(() => api.createSwap(user.id, item.id));
+			setTimeout(() => {
+				onSwapRequested?.(swap);
+				setDragX(0);
+				setExiting(null);
+				setCurrentIdx((i) => i + 1);
+			}, 280);
+		} catch {
 			setDragX(0);
 			setExiting(null);
-			setCurrentIdx((i) => i + 1);
-		}, 280);
+		}
 	}
 
 	function triggerPass() {
@@ -147,7 +128,7 @@ export default function DiscoverScreen({ onSwipeRight }: Props) {
 						className="absolute inset-0 rounded-3xl overflow-hidden"
 						style={{ transform: "scale(0.93) translateY(14px)", zIndex: 0 }}
 					>
-						<img src={nextItem.image} alt="" className="w-full h-full object-cover" style={{ filter: "brightness(0.4)" }} />
+						<img src={nextItem.image_url} alt="" className="w-full h-full object-cover" style={{ filter: "brightness(0.4)" }} />
 					</div>
 				)}
 
@@ -196,7 +177,7 @@ export default function DiscoverScreen({ onSwipeRight }: Props) {
 							<div>
 								<h2 className="text-white text-[22px] font-bold leading-tight mb-1">{item.title}</h2>
 								<div className="flex items-center gap-2">
-									<span className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>{item.owner}</span>
+									<span className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>Owner listing</span>
 								</div>
 							</div>
 							<div className="text-right">
@@ -221,6 +202,7 @@ export default function DiscoverScreen({ onSwipeRight }: Props) {
 				<button
 					onMouseDown={(e) => e.stopPropagation()}
 					onClick={triggerLike}
+					disabled={isCreatingSwap}
 					className="w-[68px] h-[68px] rounded-2xl flex items-center justify-center transition-all active:scale-90 shadow-lg"
 					style={{ background: "linear-gradient(135deg, #00CDB8, #009988)", boxShadow: "0 8px 24px rgba(0,205,184,0.3)" }}
 				>

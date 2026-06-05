@@ -4,43 +4,18 @@ import OnboardingScreen from "./components/OnboardingScreen";
 import LoginScreen from "./components/LoginScreen";
 import SignupScreen from "./components/SignupScreen";
 import DiscoverScreen from "./components/DiscoverScreen";
-import RequestSentScreen from "./components/RequestSentScreen";
-import OwnerPickScreen from "./components/OwnerPickScreen";
-import ExchangeProposalScreen from "./components/ExchangeProposalScreen";
-import CounterOfferScreen from "./components/CounterOfferScreen";
-import SwapConfirmedScreen from "./components/SwapConfirmedScreen";
 import SwapsScreen from "./components/SwapsScreen";
 import MessagesScreen from "./components/MessagesScreen";
 import ProfileScreen from "./components/ProfileScreen";
 import RateSwapScreen from "./components/RateSwapScreen";
 import React from "react";
+import { api, ItemResponseData, SwapResponseData } from "../services/endpoints";
+import { useAuth } from "../context/AuthContext";
 
 type AuthScreen = "onboarding" | "login" | "signup";
-type FlowScreen =
-	| "request-sent"
-	| "owner-pick"
-	| "exchange-proposal"
-	| "counter-offer"
-	| "swap-confirmed"
-	| "rate-swap";
+type FlowScreen = "rate-swap";
 
 type NavTab = "discover" | "swaps" | "messages" | "profile";
-
-const WANTED_ITEM = {
-	title: "Leica M6 Film Camera",
-	estimated_value: 180,
-	image_url: "https://images.unsplash.com/photo-1452780212940-6f5c0d14d848?w=600&h=800&fit=crop",
-	owner_id: "Alex M.",
-};
-
-const PROPOSER = {
-	name: "Marcus J.",
-	avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
-	rating: 4.8,
-	swaps: 23,
-};
-
-
 
 const NAV = [
 	{ id: "discover" as NavTab, icon: Compass, label: "Discover" },
@@ -49,26 +24,66 @@ const NAV = [
 	{ id: "profile" as NavTab, icon: User, label: "Profile" },
 ];
 
+function toRateItem(item: ItemResponseData) {
+	return {
+		name: item.title,
+		image: item.image_url,
+	};
+}
+
+function summarizeRateItems(items: ItemResponseData[]) {
+	if (items.length === 0) return [];
+	return items.map(toRateItem);
+}
+
 export default function App() {
+	const { user, isAuthenticated } = useAuth();
 	const [auth, setAuth] = useState<AuthScreen>("onboarding");
-	const [authed, setAuthed] = useState(false);
 	const [tab, setTab] = useState<NavTab>("discover");
 	const [flow, setFlow] = useState<FlowScreen | null>(null);
-	const [swipedItem, setSwipedItem] = useState<typeof WANTED_ITEM | null>(null);
-	const [offeredItems, setOfferedItems] = useState([]);
+	const [ratingSwap, setRatingSwap] = useState<SwapResponseData | null>(null);
 
-	function handleSwipeRight(item) {
-		setSwipedItem(item);
-		setFlow("request-sent");
+	function handleSwapRequested() {
+		setTab("swaps");
 	}
 
 	function exitFlow() {
 		setFlow(null);
-		setSwipedItem(null);
-		setOfferedItems([]);
+		setRatingSwap(null);
 	}
 
-	if (!authed) {
+	function handleRateSwap(swap: SwapResponseData) {
+		setRatingSwap(swap);
+		setFlow("rate-swap");
+	}
+
+	function getRatingPayload() {
+		if (ratingSwap && user) {
+			const isOwner = ratingSwap.owner_id === user.id;
+			const yourItems = isOwner ? [ratingSwap.wanted_item] : ratingSwap.offered_items;
+			const theirItems = isOwner ? ratingSwap.offered_items : [ratingSwap.wanted_item];
+
+			return {
+				partner: {
+					name: ratingSwap.partner.username,
+					avatar: "",
+				},
+				yourItem: toRateItem(yourItems[0] || ratingSwap.wanted_item),
+				theirItems: summarizeRateItems(theirItems),
+			};
+		}
+
+		return null;
+	}
+
+	async function handleSubmitRating(rating: number, note: string) {
+		if (ratingSwap && user) {
+			await api.rateSwap(ratingSwap.id, user.id, rating, note);
+		}
+		exitFlow();
+	}
+
+	if (!isAuthenticated) {
 		if (auth === "onboarding") {
 			return (<OnboardingScreen onLogin={() => setAuth("login")}
 				onSignup={() => setAuth("signup")}
@@ -77,19 +92,20 @@ export default function App() {
 		}
 		if (auth === "login") {
 			return (
-				<LoginScreen onLogin={() => setAuthed(true)}
+				<LoginScreen onLogin={() => setTab("discover")}
 					onGoSignup={() => setAuth("signup")}
 				/>
 			);
 		}
 		return (
-			<SignupScreen onSignup={() => setAuthed(true)}
+			<SignupScreen onSignup={() => setTab("discover")}
 				onGoLogin={() => setAuth("login")}
 			/>
 		);
 	}
 
 	const inFlow = flow !== null;
+	const ratingPayload = flow === "rate-swap" ? getRatingPayload() : null;
 
 	return (
 		<div
@@ -97,58 +113,12 @@ export default function App() {
 			style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#080C12" }}
 		>
 			<div className="flex-1 min-h-0 overflow-hidden">
-				{inFlow && flow === "request-sent" && swipedItem && (
-					<RequestSentScreen
-						item={swipedItem}
-						onContinue={() => setFlow("owner-pick")}
-					/>
-				)}
-				{inFlow && flow === "owner-pick" && (
-					<OwnerPickScreen
-						wantedItem={WANTED_ITEM}
-						requester={{ name: "" }}
-						onSendOffer={(items) => {
-							setOfferedItems(items);
-							setFlow("exchange-proposal");
-						}}
-						onBack={() => setFlow("request-sent")}
-					/>
-				)}
-				{inFlow && flow === "exchange-proposal" && (
-					<ExchangeProposalScreen
-						yourItem={WANTED_ITEM}
-						offeredItems={offeredItems}
-						proposer={PROPOSER}
-						onAccept={() => setFlow("swap-confirmed")}
-						onReject={exitFlow}
-						onCounter={() => setFlow("counter-offer")}
-						onBack={() => setFlow("owner-pick")}
-					/>
-				)}
-				{inFlow && flow === "counter-offer" && (
-					<CounterOfferScreen
-						theirItem={WANTED_ITEM}
-						proposerName={PROPOSER.name}
-						onSend={() => setFlow("swap-confirmed")}
-						onBack={() => setFlow("exchange-proposal")}
-					/>
-				)}
-				{inFlow && flow === "swap-confirmed" && (
-					<SwapConfirmedScreen
-						yourItem={WANTED_ITEM}
-						theirItems={offeredItems}
-						partnerName={PROPOSER.name}
-						partnerAvatar={PROPOSER.avatar}
-						onDone={exitFlow}
-						onRate={() => setFlow("rate-swap")}
-					/>
-				)}
-				{inFlow && flow === "rate-swap" && (
+				{inFlow && flow === "rate-swap" && ratingPayload && (
 					<RateSwapScreen
-						partner={{ name: PROPOSER.name, avatar: PROPOSER.avatar }}
-						yourItem={WANTED_ITEM}
-						theirItems={offeredItems}
-						onSubmit={exitFlow}
+						partner={ratingPayload.partner}
+						yourItem={ratingPayload.yourItem}
+						theirItems={ratingPayload.theirItems}
+						onSubmit={handleSubmitRating}
 						onSkip={exitFlow}
 					/>
 				)}
@@ -156,16 +126,16 @@ export default function App() {
 				{!inFlow && (
 					<>
 						<div className={`h-full ${tab === "discover" ? "block" : "hidden"}`}>
-							<DiscoverScreen onSwipeRight={handleSwipeRight} />
+							<DiscoverScreen onSwapRequested={handleSwapRequested} />
 						</div>
 						<div className={`h-full overflow-y-auto ${tab === "swaps" ? "block" : "hidden"}`}>
-							<SwapsScreen onRate={() => setFlow("rate-swap")} />
+							<SwapsScreen onRate={handleRateSwap} />
 						</div>
 						<div className={`h-full overflow-y-auto ${tab === "messages" ? "block" : "hidden"}`}>
 							<MessagesScreen />
 						</div>
 						<div className={`h-full overflow-y-auto ${tab === "profile" ? "block" : "hidden"}`}>
-							<ProfileScreen />
+							<ProfileScreen isActive={tab === "profile"} />
 						</div>
 					</>
 				)}
