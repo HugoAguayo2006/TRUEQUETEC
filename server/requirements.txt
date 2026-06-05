@@ -6,3 +6,5 @@ scalar_fastapi
 dotenv
 aiosqlite
 sqlmodel
+cloudinary 
+python-multipart

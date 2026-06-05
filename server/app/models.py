@@ -11,6 +11,8 @@ class User(SQLModel, table=True):
     )
     username: str = Field(unique=True, nullable=False)
     rating: float = Field(default=5.0)
+    email: str = Field(unique=True, nullable=True, default="")
+    bio: str = Field(nullable=True, default="")
 
 
 class Item(SQLModel, table=True):
@@ -23,6 +25,7 @@ class Item(SQLModel, table=True):
     owner_id: Optional[str] = Field(default=None, foreign_key="users.id")
     title: str = Field(nullable=False)
     estimated_value: float = Field(default=0.0, nullable=False)
+    image_url: str = Field(default="", nullable=True)
 
 
 class Swipe(SQLModel, table=True):

@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RefreshCw, Clock, CheckCircle, XCircle, ChevronRight, Plus, Star } from "lucide-react";
 import React from "react";
+import { api } from "../../services/endpoints";
+import { useApi } from "../../hooks/use_api";
 
 type SwapStatus = "pending" | "offer-received" | "awaiting" | "completed" | "declined";
 
@@ -129,17 +131,17 @@ interface Props {
 	onRate?: (swap: Swap) => void;
 }
 
+
+
 export default function SwapsScreen({ onRate }: Props) {
 	const [filter, setFilter] = useState<"active" | "history">("active");
 	const [rated, setRated] = useState<number[]>([]);
-
 	const active = SWAPS.filter((s) => s.status === "offer-received" || s.status === "awaiting" || s.status === "pending");
 	const history = SWAPS.filter((s) => s.status === "completed" || s.status === "declined");
 	const shown = filter === "active" ? active : history;
 
 	return (
 		<div className="flex flex-col h-full" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#080C12" }}>
-			{/* Header */}
 			<div className="px-5 pt-12 pb-5 shrink-0">
 				<div className="flex items-end justify-between mb-5">
 					<div>
@@ -154,25 +156,8 @@ export default function SwapsScreen({ onRate }: Props) {
 					</button>
 				</div>
 
-				{/* Filter tabs */}
-				<div className="flex p-1 rounded-2xl" style={{ background: "#111820" }}>
-					{(["active", "history"] as const).map((f) => (
-						<button
-							key={f}
-							onClick={() => setFilter(f)}
-							className="flex-1 py-2.5 rounded-xl text-sm font-semibold capitalize transition-all"
-							style={{
-								background: filter === f ? "#1A2230" : "transparent",
-								color: filter === f ? "#EEF2F7" : "#7A8A9A",
-							}}
-						>
-							{f === "active" ? `Active (${active.length})` : "History"}
-						</button>
-					))}
-				</div>
 			</div>
 
-			{/* List */}
 			<div className="flex-1 overflow-y-auto px-5 pb-6 flex flex-col gap-3">
 				{shown.length === 0 && (
 					<div className="flex flex-col items-center justify-center flex-1 gap-3 py-20" style={{ color: "#7A8A9A" }}>
@@ -198,7 +183,6 @@ export default function SwapsScreen({ onRate }: Props) {
 									: "1.5px solid rgba(255,255,255,0.06)",
 							}}
 						>
-							{/* Top row: partner + status + time */}
 							<div className="flex items-center justify-between mb-3">
 								<div className="flex items-center gap-2">
 									<img src={swap.partner.avatar} alt={swap.partner.name} className="w-6 h-6 rounded-full object-cover" />
@@ -216,7 +200,6 @@ export default function SwapsScreen({ onRate }: Props) {
 								</div>
 							</div>
 
-							{/* Items */}
 							<div className="flex items-center gap-3">
 								<div className="flex items-center gap-2 flex-1 min-w-0">
 									<div className="w-14 h-14 rounded-xl overflow-hidden shrink-0" style={{ background: "#1A2230" }}>
