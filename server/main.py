@@ -11,6 +11,7 @@ from app.database import engine
 from app.routers.user import user_router
 from app.routers.item import item_router
 from app.routers.swap import swap_router
+from app.routers.pricing import pricing_router
 from scalar_fastapi import get_scalar_api_reference
 from fastapi.middleware.cors import CORSMiddleware
 from app.init_db import init_db
@@ -24,6 +25,7 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(user_router)
 app.include_router(item_router)
 app.include_router(swap_router)
+app.include_router(pricing_router)
 
 app.add_middleware(
     CORSMiddleware,

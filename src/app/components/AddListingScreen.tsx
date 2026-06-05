@@ -215,7 +215,7 @@ export default function AddListingScreen({ onBack, onPublish, initialListing, mo
 								className="flex-1 bg-transparent text-sm outline-none"
 								style={{ color: "#EEF2F7", fontFamily: "inherit" }}
 							/>
-							<span className="text-sm" style={{ color: "#4A5A6A" }}>USD</span>
+							<span className="text-sm" style={{ color: "#4A5A6A" }}>MXN</span>
 						</div>
 						{errors.value
 							? <p className="text-xs" style={{ color: "#FF3A5C" }}>{errors.value}</p>

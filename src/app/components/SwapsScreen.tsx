@@ -5,12 +5,15 @@ import { api, ItemResponseData, SwapResponseData } from "../../services/endpoint
 import { WS_BASE_URL } from "../../services/api_client";
 import { useApi } from "../../hooks/use_api";
 import { useAuth } from "../../context/AuthContext";
+import { formatMoney } from "../../utils/currency";
+import ProductPrice from "./ProductPrice";
 
 type SwapStatus = "pending" | "offer-received" | "awaiting" | "accepted" | "countered" | "completed" | "declined";
 type DisplayItem = {
 	name: string;
 	image: string;
 	value: number;
+	itemCount: number;
 };
 
 const STATUS_META: Record<SwapStatus, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
@@ -87,20 +90,18 @@ function toDisplayItem(item: SwapResponseData["wanted_item"]): DisplayItem {
 		name: item.title,
 		image: item.image_url,
 		value: item.estimated_value,
+		itemCount: 1,
 	};
 }
 
 function summarizeItems(items: SwapResponseData["offered_items"], fallback = "Sin artículos todavía"): DisplayItem {
-	if (!items.length) return { name: fallback, image: "", value: 0 };
+	if (!items.length) return { name: fallback, image: "", value: 0, itemCount: 0 };
 	return {
 		name: items.map((item) => item.title).join(" + "),
 		image: items[0].image_url,
 		value: items.reduce((sum, item) => sum + item.estimated_value, 0),
+		itemCount: items.length,
 	};
-}
-
-function money(value: number) {
-	return `$${value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
 }
 
 export default function SwapsScreen({ onRate }: Props) {
@@ -192,7 +193,7 @@ export default function SwapsScreen({ onRate }: Props) {
 					<div className="absolute inset-0 flex flex-col justify-end p-4">
 						<span className="text-white/60 text-xs font-medium uppercase tracking-wider">Quiere</span>
 						<span className="text-white font-bold text-base leading-tight">{pickingSwap.wanted_item.title}</span>
-						<span className="text-sm font-semibold" style={{ color: "#00CDB8" }}>${pickingSwap.wanted_item.estimated_value}</span>
+						<ProductPrice productName={pickingSwap.wanted_item.title} userValue={pickingSwap.wanted_item.estimated_value} variant="inline" />
 					</div>
 				</div>
 
@@ -230,7 +231,7 @@ export default function SwapsScreen({ onRate }: Props) {
 									</div>
 									<div className="p-3">
 										<p className="text-sm font-semibold leading-tight truncate" style={{ color: "#EEF2F7" }}>{item.title}</p>
-										<p className="text-xs font-bold mt-1" style={{ color: selected ? "#00CDB8" : "#7A8A9A" }}>${item.estimated_value}</p>
+										<ProductPrice productName={item.title} userValue={item.estimated_value} variant="inline" />
 									</div>
 								</button>
 							);
@@ -242,10 +243,10 @@ export default function SwapsScreen({ onRate }: Props) {
 					{selectedOfferIds.length > 0 && (
 						<div className="flex items-center justify-between mb-3">
 							<span className="text-sm" style={{ color: "#7A8A9A" }}>
-								{selectedOfferIds.length} seleccionados - ${selectedValue}
+								{selectedOfferIds.length} seleccionados - {formatMoney(selectedValue)}
 							</span>
 							<span className="text-sm font-semibold" style={{ color: diff >= 0 ? "#00CDB8" : "#FF3A5C" }}>
-								{diff >= 0 ? "+" : "-"}${Math.abs(diff)}
+								{diff >= 0 ? "+" : "-"}{formatMoney(Math.abs(diff))}
 							</span>
 						</div>
 					)}
@@ -351,7 +352,11 @@ export default function SwapsScreen({ onRate }: Props) {
 									<div className="min-w-0">
 										<p className="text-xs truncate font-medium" style={{ color: "#7A8A9A" }}>Das</p>
 										<p className="text-sm font-semibold truncate" style={{ color: "#EEF2F7" }}>{yourItem.name}</p>
-										<p className="text-xs font-semibold" style={{ color: "#00CDB8" }}>${yourItem.value}</p>
+										{yourItem.itemCount === 1 ? (
+											<ProductPrice productName={yourItem.name} userValue={yourItem.value} />
+										) : (
+											<p className="text-xs font-semibold" style={{ color: "#00CDB8" }}>{formatMoney(yourItem.value)}</p>
+										)}
 									</div>
 								</div>
 
@@ -368,7 +373,11 @@ export default function SwapsScreen({ onRate }: Props) {
 									<div className="min-w-0 text-right">
 										<p className="text-xs font-medium" style={{ color: "#7A8A9A" }}>Recibes</p>
 										<p className="text-sm font-semibold truncate" style={{ color: "#EEF2F7" }}>{theirItem.name}</p>
-										<p className="text-xs font-semibold" style={{ color: "#00CDB8" }}>${theirItem.value}</p>
+										{theirItem.itemCount === 1 ? (
+											<ProductPrice productName={theirItem.name} userValue={theirItem.value} align="right" />
+										) : (
+											<p className="text-xs font-semibold" style={{ color: "#00CDB8" }}>{formatMoney(theirItem.value)}</p>
+										)}
 									</div>
 								</div>
 							</div>
@@ -383,7 +392,7 @@ export default function SwapsScreen({ onRate }: Props) {
 											Detalles de la oferta
 										</span>
 										<span className="text-xs font-bold" style={{ color: valueDiff >= 0 ? "#00CDB8" : "#FF3A5C" }}>
-											{valueDiff >= 0 ? "+" : "-"}{money(Math.abs(valueDiff))}
+											{valueDiff >= 0 ? "+" : "-"}{formatMoney(Math.abs(valueDiff))}
 										</span>
 									</div>
 
@@ -400,9 +409,9 @@ export default function SwapsScreen({ onRate }: Props) {
 												</p>
 												<p className="text-sm font-semibold truncate" style={{ color: "#EEF2F7" }}>{swap.wanted_item.title}</p>
 											</div>
-											<span className="text-sm font-bold shrink-0" style={{ color: "#00CDB8" }}>
-												{money(swap.wanted_item.estimated_value)}
-											</span>
+											<div className="shrink-0">
+												<ProductPrice productName={swap.wanted_item.title} userValue={swap.wanted_item.estimated_value} align="right" />
+											</div>
 										</div>
 
 										<div className="p-3 flex flex-col gap-2">
@@ -410,7 +419,7 @@ export default function SwapsScreen({ onRate }: Props) {
 												<p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#7A8A9A" }}>
 													Artículos seleccionados ({swap.offered_items.length})
 												</p>
-												<span className="text-xs font-bold" style={{ color: "#EEF2F7" }}>{money(offeredTotal)}</span>
+												<span className="text-xs font-bold" style={{ color: "#EEF2F7" }}>{formatMoney(offeredTotal)}</span>
 											</div>
 
 											{swap.offered_items.map((item) => (
@@ -419,7 +428,9 @@ export default function SwapsScreen({ onRate }: Props) {
 														{item.image_url && <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />}
 													</div>
 													<p className="text-sm font-medium truncate flex-1" style={{ color: "#EEF2F7" }}>{item.title}</p>
-													<span className="text-sm font-semibold shrink-0" style={{ color: "#7A8A9A" }}>{money(item.estimated_value)}</span>
+													<div className="shrink-0">
+														<ProductPrice productName={item.title} userValue={item.estimated_value} align="right" />
+													</div>
 												</div>
 											))}
 										</div>

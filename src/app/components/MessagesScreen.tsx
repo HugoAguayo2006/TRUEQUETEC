@@ -4,6 +4,8 @@ import { api, MessageResponseData, SwapResponseData } from "../../services/endpo
 import { WS_BASE_URL } from "../../services/api_client";
 import { useApi } from "../../hooks/use_api";
 import { useAuth } from "../../context/AuthContext";
+import { formatMoney } from "../../utils/currency";
+import ProductPrice from "./ProductPrice";
 
 function formatTime(value?: string) {
   if (!value) return "";
@@ -41,11 +43,6 @@ function statusLabel(status: SwapResponseData["status"]) {
   };
   return labels[status] || status;
 }
-
-function money(value: number) {
-  return `$${value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-}
-
 
 export default function MessagesScreen() {
   const [openSwap, setOpenSwap] = useState<SwapResponseData | null>(null);
@@ -157,7 +154,7 @@ export default function MessagesScreen() {
               <div className="text-right">
                 <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#7A8A9A" }}>Diferencia</p>
                 <p className="text-sm font-bold" style={{ color: valueDiff >= 0 ? "#00CDB8" : "#FF3A5C" }}>
-                  {valueDiff >= 0 ? "+" : "-"}{money(Math.abs(valueDiff))}
+                  {valueDiff >= 0 ? "+" : "-"}{formatMoney(Math.abs(valueDiff))}
                 </p>
               </div>
             </div>
@@ -169,7 +166,9 @@ export default function MessagesScreen() {
                   {openSwap.wanted_item.image_url && <img src={openSwap.wanted_item.image_url} alt={openSwap.wanted_item.title} className="w-full h-full object-cover" />}
                 </div>
                 <p className="text-sm font-semibold flex-1 truncate" style={{ color: "#EEF2F7" }}>{openSwap.wanted_item.title}</p>
-                <span className="text-sm font-bold" style={{ color: "#00CDB8" }}>{money(openSwap.wanted_item.estimated_value)}</span>
+                <div className="shrink-0">
+                  <ProductPrice productName={openSwap.wanted_item.title} userValue={openSwap.wanted_item.estimated_value} align="right" />
+                </div>
               </div>
             </div>
 
@@ -178,7 +177,7 @@ export default function MessagesScreen() {
                 <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#7A8A9A" }}>
                   Artículos ofrecidos ({openSwap.offered_items.length})
                 </p>
-                <span className="text-xs font-bold" style={{ color: "#EEF2F7" }}>{money(offeredTotal)}</span>
+                <span className="text-xs font-bold" style={{ color: "#EEF2F7" }}>{formatMoney(offeredTotal)}</span>
               </div>
 
               {openSwap.offered_items.length === 0 ? (
@@ -191,7 +190,7 @@ export default function MessagesScreen() {
                         {item.image_url && <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />}
                       </div>
                       <p className="text-sm font-medium flex-1 truncate" style={{ color: "#EEF2F7" }}>{item.title}</p>
-                      <span className="text-sm font-semibold" style={{ color: "#7A8A9A" }}>{money(item.estimated_value)}</span>
+                      <ProductPrice productName={item.title} userValue={item.estimated_value} align="right" />
                     </div>
                   ))}
                 </div>

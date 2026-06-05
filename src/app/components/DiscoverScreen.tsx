@@ -4,6 +4,7 @@ import React from "react";
 import { api, ItemResponseData, SwapResponseData } from "../../services/endpoints";
 import { useApi } from "../../hooks/use_api";
 import { useAuth } from "../../context/AuthContext";
+import ProductPrice from "./ProductPrice";
 
 interface Props {
 	onSwapRequested?: (swap: SwapResponseData) => void;
@@ -181,7 +182,7 @@ export default function DiscoverScreen({ onSwapRequested }: Props) {
 								</div>
 							</div>
 							<div className="text-right">
-								<span className="text-xl font-extrabold" style={{ color: "#00CDB8" }}>${item.estimated_value}</span>
+								<ProductPrice productName={item.title} userValue={item.estimated_value} align="right" variant="hero" />
 							</div>
 						</div>
 					</div>
