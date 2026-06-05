@@ -23,6 +23,7 @@ export interface UserResponseData {
 	email: string;
 	bio: string;
 	rating: number;
+	role: "user" | "admin";
 }
 
 export interface MessageResponseData {
@@ -105,6 +106,18 @@ export const api = {
 	getUserItems: (userId: string, availableOnly = false) => {
 		return apiClient<ItemResponseData[]>(`/items?owner_id=${userId}${availableOnly ? "&available_only=true" : ""}`, {
 			method: "GET",
+		});
+	},
+
+	getAdminItems: () => {
+		return apiClient<ItemResponseData[]>("/items?all_items=true", {
+			method: "GET",
+		});
+	},
+
+	deleteItem: (itemId: string, ownerId?: string) => {
+		return apiClient<void>(`/items/${itemId}${ownerId ? `?owner_id=${ownerId}` : ""}`, {
+			method: "DELETE",
 		});
 	},
 

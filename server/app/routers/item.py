@@ -1,8 +1,8 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Response, status
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Request, Response, status
 from app.database import AsyncSession, get_db
-from app.models import  Item
+from app.models import  Item, User
 from app.schemas import  ItemCreate, ItemResponse, ItemUpdate
 from sqlmodel import select
 from dotenv import load_dotenv
@@ -36,11 +36,19 @@ async def upload_item_image(file: UploadFile = File(...)):
 
 
 @item_router.get("/", response_model=List[ItemResponse], summary="Obtener todos los artículos")
-async def get_items(skip: Optional[str] = None,
+async def get_items(request: Request,
+     skip: Optional[str] = None,
      owner_id: Optional[str] = None,
      available_only: bool = False,
+     all_items: bool = False,
      session: AsyncSession = Depends(get_db)):
-    if skip:
+    if all_items:
+        current_user_id = request.headers.get("X-User-Id")
+        current_user = await session.get(User, current_user_id) if current_user_id else None
+        if current_user is None or current_user.role != "admin":
+            raise HTTPException(status_code=403, detail="Solo administradores pueden ver todas las publicaciones")
+        statement = select(Item)
+    elif skip:
         statement = select(Item).where(Item.owner_id != skip, Item.is_available == True)
     elif owner_id:
         statement = select(Item).where(Item.owner_id == owner_id)
@@ -89,11 +97,22 @@ async def update_item(item_id: str, data: ItemUpdate, session: AsyncSession = De
 
 
 @item_router.delete("/{item_id}", status_code=204, summary="Eliminar artículo por id")
-async def delete_item(item_id: str, owner_id: Optional[str] = None, session: AsyncSession = Depends(get_db)):
+async def delete_item(
+    item_id: str,
+    request: Request,
+    owner_id: Optional[str] = None,
+    session: AsyncSession = Depends(get_db)
+):
     item = await session.get(Item, item_id)
     if not item:
         raise HTTPException(status_code=404, detail="Artículo no encontrado")
-    if owner_id and item.owner_id != owner_id:
+
+    current_user_id = request.headers.get("X-User-Id")
+    current_user = await session.get(User, current_user_id) if current_user_id else None
+    is_admin = current_user is not None and current_user.role == "admin"
+    is_owner = owner_id is not None and item.owner_id == owner_id
+
+    if not is_admin and not is_owner:
         raise HTTPException(status_code=403, detail="Solo puedes eliminar tus propias publicaciones")
 
     await session.delete(item)
