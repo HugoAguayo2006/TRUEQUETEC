@@ -14,6 +14,7 @@ class User(SQLModel, table=True):
     email: str = Field(unique=True, nullable=True, default="")
     bio: str = Field(nullable=True, default="")
     password_hash: str = Field(default="", nullable=False)
+    role: str = Field(default="user", nullable=False)
 
 
 class Item(SQLModel, table=True):

@@ -30,6 +30,7 @@ class UserResponse(SQLModel):
     email: str
     bio: str
     rating: float
+    role: str = "user"
     class Config: from_attributes = True
 
 class ItemCreate(SQLModel):
