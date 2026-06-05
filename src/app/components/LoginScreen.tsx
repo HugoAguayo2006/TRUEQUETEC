@@ -72,7 +72,7 @@ export default function LoginScreen({ onLogin, onGoSignup }: Props) {
 						<circle cx="14" cy="14" r="2.5" fill="white" />
 					</svg>
 				</div>
-				<h1 className="text-2xl font-extrabold tracking-tight" style={{ color: "#EEF2F7" }}>Swaply</h1>
+				<h1 className="text-2xl font-extrabold tracking-tight" style={{ color: "#EEF2F7" }}>TRUEQUETEC</h1>
 				<p className="text-sm mt-1" style={{ color: "#7A8A9A" }}>Intercambia cosas que amas</p>
 			</div>
 

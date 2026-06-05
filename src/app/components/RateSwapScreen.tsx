@@ -61,7 +61,7 @@ export default function RateSwapScreen({ partner, yourItem, theirItems, onSubmit
 				</div>
 				<h2 className="text-2xl font-extrabold text-center" style={{ color: "#EEF2F7" }}>¡Gracias por calificar!</h2>
 				<p className="text-sm text-center" style={{ color: "#7A8A9A" }}>
-					Tu reseña ayuda a generar confianza en la comunidad de Swaply.
+					Tu reseña ayuda a generar confianza en la comunidad de TRUEQUETEC.
 				</p>
 			</div>
 		);
