@@ -21,10 +21,10 @@ export default function LoginScreen({ onLogin, onGoSignup }: Props) {
 
 	function validate() {
 		const e: typeof errors = {};
-		if (!email) e.email = "Email is required";
-		else if (!/\S+@\S+\.\S+/.test(email)) e.email = "Enter a valid email";
-		if (!password) e.password = "Password is required";
-		else if (password.length < 6) e.password = "At least 6 characters";
+		if (!email) e.email = "El correo es obligatorio";
+		else if (!/\S+@\S+\.\S+/.test(email)) e.email = "Ingresa un correo válido";
+		if (!password) e.password = "La contraseña es obligatoria";
+		else if (password.length < 6) e.password = "Debe tener al menos 6 caracteres";
 		return e;
 	}
 
@@ -41,7 +41,7 @@ export default function LoginScreen({ onLogin, onGoSignup }: Props) {
 					onLogin();
 				},
 				onError: () => {
-					setErrors({ password: "Invalid email or password" });
+					setErrors({ password: "Correo o contraseña incorrectos" });
 				},
 			});
 		} catch (err) {
@@ -73,13 +73,13 @@ export default function LoginScreen({ onLogin, onGoSignup }: Props) {
 					</svg>
 				</div>
 				<h1 className="text-2xl font-extrabold tracking-tight" style={{ color: "#EEF2F7" }}>Swaply</h1>
-				<p className="text-sm mt-1" style={{ color: "#7A8A9A" }}>Trade things you love</p>
+				<p className="text-sm mt-1" style={{ color: "#7A8A9A" }}>Intercambia cosas que amas</p>
 			</div>
 
 			<form onSubmit={handleSubmit} className="flex flex-col gap-4 flex-1">
 				<div>
-					<h2 className="text-xl font-extrabold mb-1" style={{ color: "#EEF2F7" }}>Welcome back</h2>
-					<p className="text-sm" style={{ color: "#7A8A9A" }}>Sign in to continue swapping</p>
+					<h2 className="text-xl font-extrabold mb-1" style={{ color: "#EEF2F7" }}>Bienvenido de nuevo</h2>
+					<p className="text-sm" style={{ color: "#7A8A9A" }}>Inicia sesión para seguir intercambiando</p>
 				</div>
 
 				{/* Global Fetch Connection Error Alert banner */}
@@ -102,7 +102,7 @@ export default function LoginScreen({ onLogin, onGoSignup }: Props) {
 							type="email"
 							value={email}
 							onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: undefined })); }}
-							placeholder="Email address"
+							placeholder="Correo electrónico"
 							className="flex-1 bg-transparent text-sm outline-none"
 							style={{ color: "#EEF2F7", fontFamily: "inherit" }}
 							autoComplete="email"
@@ -124,7 +124,7 @@ export default function LoginScreen({ onLogin, onGoSignup }: Props) {
 							type={showPw ? "text" : "password"}
 							value={password}
 							onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: undefined })); }}
-							placeholder="Password"
+							placeholder="Contraseña"
 							className="flex-1 bg-transparent text-sm outline-none"
 							style={{ color: "#EEF2F7", fontFamily: "inherit" }}
 							autoComplete="current-password"
@@ -153,14 +153,14 @@ export default function LoginScreen({ onLogin, onGoSignup }: Props) {
 					{isLoading ? (
 						<div className="w-5 h-5 rounded-full border-2 border-current border-t-transparent animate-spin" />
 					) : (
-						<>Sign In <ArrowRight size={16} /></>
+						<>Iniciar sesión <ArrowRight size={16} /></>
 					)}
 				</button>
 
 				<div className="flex items-center justify-center gap-1.5 pb-8 mt-auto pt-4">
-					<span className="text-sm" style={{ color: "#7A8A9A" }}>Don't have an account?</span>
+					<span className="text-sm" style={{ color: "#7A8A9A" }}>¿No tienes cuenta?</span>
 					<button type="button" onClick={onGoSignup} className="text-sm font-bold" style={{ color: "#00CDB8" }}>
-						Sign up
+						Regístrate
 					</button>
 				</div>
 			</form>
