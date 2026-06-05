@@ -1,6 +1,7 @@
 from app.database import engine
+import app.models  # noqa: F401 - register SQLModel tables before create_all
 from sqlmodel import SQLModel
-from sqlalchemy import text
+from sqlalchemy import inspect, text
 import hashlib
 import os
 
@@ -15,13 +16,19 @@ def hash_password(password: str) -> str:
 async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
-        result = await conn.execute(text("PRAGMA table_info(items)"))
-        item_columns = {row[1] for row in result.fetchall()}
-        if "is_available" not in item_columns:
-            await conn.execute(text("ALTER TABLE items ADD COLUMN is_available BOOLEAN NOT NULL DEFAULT 1"))
 
-        result = await conn.execute(text("PRAGMA table_info(users)"))
-        user_columns = {row[1] for row in result.fetchall()}
+        item_columns = await conn.run_sync(
+            lambda sync_conn: {column["name"] for column in inspect(sync_conn).get_columns("items")}
+        )
+        if "is_available" not in item_columns:
+            default_value = "1" if conn.dialect.name == "sqlite" else "true"
+            await conn.execute(
+                text(f"ALTER TABLE items ADD COLUMN is_available BOOLEAN NOT NULL DEFAULT {default_value}")
+            )
+
+        user_columns = await conn.run_sync(
+            lambda sync_conn: {column["name"] for column in inspect(sync_conn).get_columns("users")}
+        )
         if "password_hash" not in user_columns:
             await conn.execute(text("ALTER TABLE users ADD COLUMN password_hash VARCHAR NOT NULL DEFAULT ''"))
         if "role" not in user_columns:
