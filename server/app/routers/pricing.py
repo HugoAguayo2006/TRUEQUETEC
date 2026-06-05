@@ -99,9 +99,9 @@ def detect_currency(result: dict[str, Any]) -> str:
     price_text = str(result.get("price") or "")
     if "mx$" in price_text.lower() or "mxn" in price_text.lower():
         return "MXN"
-    if "usd" in price_text.lower() or "us$" in price_text.lower() or "$" in price_text:
+    if "usd" in price_text.lower() or "us$" in price_text.lower():
         return "USD"
-    return "USD"
+    return "MXN"
 
 
 def usd_to_mxn_rate() -> float:
