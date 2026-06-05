@@ -51,7 +51,7 @@ export default function OnboardingScreen({ onLogin, onSignup }: Props) {
 						boxShadow: "0 8px 32px rgba(0,205,184,0.25)",
 					}}
 				>
-					Get started <ArrowRight size={16} />
+					Comenzar <ArrowRight size={16} />
 				</button>
 
 				<button
@@ -59,11 +59,11 @@ export default function OnboardingScreen({ onLogin, onSignup }: Props) {
 					className="w-full py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
 					style={{ background: "#111820", color: "#EEF2F7", border: "1.5px solid rgba(255,255,255,0.08)" }}
 				>
-					I already have an account
+					Ya tengo cuenta
 				</button>
 
 				<p className="text-center text-xs pt-1" style={{ color: "#3A4A5A" }}>
-					By continuing you agree to our Terms & Privacy Policy
+					Al continuar, aceptas nuestros términos y política de privacidad
 				</p>
 			</div>
 		</div>

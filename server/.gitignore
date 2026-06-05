@@ -5,3 +5,4 @@ swapmatch.db
 .env.*
 !.env.example
 !.env.template
+/venv

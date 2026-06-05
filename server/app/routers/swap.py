@@ -17,7 +17,7 @@ from app.schemas import (
 )
 from sqlmodel import select
 
-swap_router = APIRouter(prefix="/swaps", tags=["Swaps"])
+swap_router = APIRouter(prefix="/swaps", tags=["Trueques"])
 
 
 class ConnectionManager:
@@ -59,7 +59,7 @@ def _parse_item_ids(raw: str) -> list[str]:
 async def _transfer_swap_items(swap: Swap, session: AsyncSession):
     wanted_item = await session.get(Item, swap.wanted_item_id)
     if not wanted_item:
-        raise HTTPException(status_code=404, detail="Wanted item not found")
+        raise HTTPException(status_code=404, detail="Artículo solicitado no encontrado")
 
     wanted_item.owner_id = swap.requester_id
     wanted_item.is_available = False
@@ -68,7 +68,7 @@ async def _transfer_swap_items(swap: Swap, session: AsyncSession):
     for item_id in _parse_item_ids(swap.offered_item_ids):
         offered_item = await session.get(Item, item_id)
         if not offered_item:
-            raise HTTPException(status_code=404, detail=f"Offered item {item_id} not found")
+            raise HTTPException(status_code=404, detail=f"Artículo ofrecido {item_id} no encontrado")
         offered_item.owner_id = swap.owner_id
         offered_item.is_available = False
         session.add(offered_item)
@@ -81,7 +81,7 @@ async def _get_swap_response(
 ) -> SwapResponse:
     wanted_item = await session.get(Item, swap.wanted_item_id)
     if not wanted_item:
-        raise HTTPException(status_code=404, detail="Wanted item not found")
+        raise HTTPException(status_code=404, detail="Artículo solicitado no encontrado")
 
     offered_items = []
     for item_id in _parse_item_ids(swap.offered_item_ids):
@@ -94,7 +94,7 @@ async def _get_swap_response(
         partner_id = swap.requester_id
     partner = await session.get(User, partner_id)
     if not partner:
-        raise HTTPException(status_code=404, detail="Swap partner not found")
+        raise HTTPException(status_code=404, detail="Persona del trueque no encontrada")
 
     result = await session.execute(
         select(Message)
@@ -128,7 +128,7 @@ async def swaps_websocket(websocket: WebSocket, user_id: str):
         manager.disconnect(user_id, websocket)
 
 
-@swap_router.get("/", response_model=List[SwapResponse], summary="Get swaps for a user")
+@swap_router.get("/", response_model=List[SwapResponse], summary="Obtener trueques de un usuario")
 async def get_swaps(user_id: str, session: AsyncSession = Depends(get_db)):
     statement = (
         select(Swap)
@@ -140,15 +140,15 @@ async def get_swaps(user_id: str, session: AsyncSession = Depends(get_db)):
     return [await _get_swap_response(swap, session, user_id) for swap in swaps]
 
 
-@swap_router.post("/", response_model=SwapResponse, status_code=201, summary="Create a swap request")
+@swap_router.post("/", response_model=SwapResponse, status_code=201, summary="Crear una solicitud de trueque")
 async def create_swap(data: SwapCreate, session: AsyncSession = Depends(get_db)):
     wanted_item = await session.get(Item, data.wanted_item_id)
     if not wanted_item:
-        raise HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(status_code=404, detail="Artículo no encontrado")
     if not wanted_item.is_available:
-        raise HTTPException(status_code=400, detail="This item is no longer available")
+        raise HTTPException(status_code=400, detail="Este artículo ya no está disponible")
     if wanted_item.owner_id == data.requester_id:
-        raise HTTPException(status_code=400, detail="You cannot request your own item")
+        raise HTTPException(status_code=400, detail="No puedes solicitar tu propio artículo")
 
     statement = select(Swap).where(
         Swap.requester_id == data.requester_id,
@@ -174,7 +174,7 @@ async def create_swap(data: SwapCreate, session: AsyncSession = Depends(get_db))
     return await _get_swap_response(swap, session, data.requester_id)
 
 
-@swap_router.patch("/{swap_id}/offer", response_model=SwapResponse, summary="Attach offered items to a swap")
+@swap_router.patch("/{swap_id}/offer", response_model=SwapResponse, summary="Agregar artículos ofrecidos a un trueque")
 async def update_swap_offer(
     swap_id: str,
     data: SwapOfferUpdate,
@@ -182,16 +182,16 @@ async def update_swap_offer(
 ):
     swap = await session.get(Swap, swap_id)
     if not swap:
-        raise HTTPException(status_code=404, detail="Swap not found")
+        raise HTTPException(status_code=404, detail="Trueque no encontrado")
 
     for item_id in data.offered_item_ids:
         item = await session.get(Item, item_id)
         if not item:
-            raise HTTPException(status_code=404, detail=f"Item {item_id} not found")
+            raise HTTPException(status_code=404, detail=f"Artículo {item_id} no encontrado")
         if item.owner_id != swap.requester_id:
-            raise HTTPException(status_code=400, detail="Offered items must belong to the requester")
+            raise HTTPException(status_code=400, detail="Los artículos ofrecidos deben pertenecer a quien solicita el trueque")
         if not item.is_available:
-            raise HTTPException(status_code=400, detail="Offered items must be available")
+            raise HTTPException(status_code=400, detail="Los artículos ofrecidos deben estar disponibles")
 
     swap.offered_item_ids = json.dumps(data.offered_item_ids)
     swap.status = "awaiting"
@@ -204,7 +204,7 @@ async def update_swap_offer(
     return await _get_swap_response(swap, session, swap.requester_id)
 
 
-@swap_router.patch("/{swap_id}/status", response_model=SwapResponse, summary="Update swap status")
+@swap_router.patch("/{swap_id}/status", response_model=SwapResponse, summary="Actualizar estado del trueque")
 async def update_swap_status(
     swap_id: str,
     data: SwapStatusUpdate,
@@ -212,21 +212,21 @@ async def update_swap_status(
 ):
     allowed_statuses = {"pending", "awaiting", "accepted", "countered", "completed", "declined"}
     if data.status not in allowed_statuses:
-        raise HTTPException(status_code=400, detail="Invalid swap status")
+        raise HTTPException(status_code=400, detail="Estado de trueque inválido")
 
     swap = await session.get(Swap, swap_id)
     if not swap:
-        raise HTTPException(status_code=404, detail="Swap not found")
+        raise HTTPException(status_code=404, detail="Trueque no encontrado")
 
     if data.status == "accepted":
         if swap.status != "awaiting":
-            raise HTTPException(status_code=400, detail="Only swaps with an offer can be accepted")
+            raise HTTPException(status_code=400, detail="Solo se pueden aceptar trueques con una oferta")
         if not _parse_item_ids(swap.offered_item_ids):
-            raise HTTPException(status_code=400, detail="Cannot accept a swap without offered items")
+            raise HTTPException(status_code=400, detail="No se puede aceptar un trueque sin artículos ofrecidos")
         await _transfer_swap_items(swap, session)
 
     if data.status == "completed" and swap.status != "accepted":
-        raise HTTPException(status_code=400, detail="Only accepted swaps can be confirmed as received")
+        raise HTTPException(status_code=400, detail="Solo se pueden confirmar como recibidos los trueques aceptados")
 
     swap.status = data.status
     swap.updated_at = datetime.now(timezone.utc)
@@ -238,7 +238,7 @@ async def update_swap_status(
     return await _get_swap_response(swap, session)
 
 
-@swap_router.get("/{swap_id}/messages", response_model=List[MessageResponse], summary="Get swap messages")
+@swap_router.get("/{swap_id}/messages", response_model=List[MessageResponse], summary="Obtener mensajes del trueque")
 async def get_messages(swap_id: str, session: AsyncSession = Depends(get_db)):
     result = await session.execute(
         select(Message)
@@ -248,7 +248,7 @@ async def get_messages(swap_id: str, session: AsyncSession = Depends(get_db)):
     return result.scalars().all()
 
 
-@swap_router.post("/{swap_id}/messages", response_model=MessageResponse, status_code=201, summary="Send a swap message")
+@swap_router.post("/{swap_id}/messages", response_model=MessageResponse, status_code=201, summary="Enviar mensaje del trueque")
 async def create_message(
     swap_id: str,
     data: MessageCreate,
@@ -256,11 +256,11 @@ async def create_message(
 ):
     swap = await session.get(Swap, swap_id)
     if not swap:
-        raise HTTPException(status_code=404, detail="Swap not found")
+        raise HTTPException(status_code=404, detail="Trueque no encontrado")
     if data.sender_id not in {swap.requester_id, swap.owner_id}:
-        raise HTTPException(status_code=403, detail="Sender is not part of this swap")
+        raise HTTPException(status_code=403, detail="Quien envía el mensaje no forma parte de este trueque")
     if not data.body.strip():
-        raise HTTPException(status_code=400, detail="Message body cannot be empty")
+        raise HTTPException(status_code=400, detail="El mensaje no puede estar vacío")
 
     message = Message(swap_id=swap_id, sender_id=data.sender_id, body=data.body.strip())
     swap.updated_at = datetime.now(timezone.utc)
@@ -289,7 +289,7 @@ async def create_message(
 async def _recalculate_user_rating(user_id: str, session: AsyncSession) -> User:
     user = await session.get(User, user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="Rated user not found")
+        raise HTTPException(status_code=404, detail="Usuario calificado no encontrado")
 
     result = await session.execute(
         select(SwapRating).where(SwapRating.rated_user_id == user_id)
@@ -306,22 +306,22 @@ async def _recalculate_user_rating(user_id: str, session: AsyncSession) -> User:
     return user
 
 
-@swap_router.post("/{swap_id}/ratings", response_model=SwapRatingResponse, status_code=201, summary="Rate a completed swap")
+@swap_router.post("/{swap_id}/ratings", response_model=SwapRatingResponse, status_code=201, summary="Calificar un trueque completado")
 async def rate_swap(
     swap_id: str,
     data: SwapRatingCreate,
     session: AsyncSession = Depends(get_db),
 ):
     if data.rating < 1 or data.rating > 5:
-        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
+        raise HTTPException(status_code=400, detail="La calificación debe estar entre 1 y 5")
 
     swap = await session.get(Swap, swap_id)
     if not swap:
-        raise HTTPException(status_code=404, detail="Swap not found")
+        raise HTTPException(status_code=404, detail="Trueque no encontrado")
     if swap.status != "completed":
-        raise HTTPException(status_code=400, detail="Only completed swaps can be rated")
+        raise HTTPException(status_code=400, detail="Solo se pueden calificar trueques completados")
     if data.rater_id not in {swap.requester_id, swap.owner_id}:
-        raise HTTPException(status_code=403, detail="Rater is not part of this swap")
+        raise HTTPException(status_code=403, detail="Quien califica no forma parte de este trueque")
 
     rated_user_id = swap.owner_id if data.rater_id == swap.requester_id else swap.requester_id
     existing_result = await session.execute(
@@ -332,7 +332,7 @@ async def rate_swap(
     )
     existing_rating = existing_result.scalars().first()
     if existing_rating:
-        raise HTTPException(status_code=400, detail="You already rated this swap")
+        raise HTTPException(status_code=400, detail="Ya calificaste este trueque")
 
     swap_rating = SwapRating(
         swap_id=swap_id,

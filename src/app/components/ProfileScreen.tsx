@@ -125,7 +125,7 @@ export default function ProfileScreen({ isActive = false }: Props) {
 						onClick={logoutSession}
 						className="w-10 h-10 rounded-2xl flex items-center justify-center transition-all active:scale-95"
 						style={{ background: "#111820", color: "#FF3A5C", border: "1.5px solid rgba(255,58,92,0.18)" }}
-						title="Log out"
+						title="Cerrar sesión"
 					>
 						<LogOut size={17} />
 					</button>
@@ -162,10 +162,10 @@ export default function ProfileScreen({ isActive = false }: Props) {
 							<div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: "rgba(0,205,184,0.15)" }}>
 								<Plus size={14} style={{ color: "#00CDB8" }} />
 							</div>
-							Add New Listing
+							Agregar publicación
 						</button>
 
-						{error && <p className="text-xs text-[#FF3A5C] text-center">Failed to fetch updates.</p>}
+						{error && <p className="text-xs text-[#FF3A5C] text-center">No se pudieron cargar las actualizaciones.</p>}
 
 						{items?.map((item) => (
 							<div
@@ -182,7 +182,7 @@ export default function ProfileScreen({ isActive = false }: Props) {
 										<span className="font-bold text-sm" style={{ color: "#00CDB8" }}>${item.estimated_value}</span>
 										{!item.is_available && (
 											<span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(56,189,248,0.12)", color: "#38BDF8" }}>
-												Swapped
+												Intercambiado
 											</span>
 										)}
 									</div>
