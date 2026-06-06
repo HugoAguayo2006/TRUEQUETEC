@@ -30,13 +30,17 @@ app.include_router(pricing_router)
 
 frontend_origins = [
     origin.strip()
-    for origin in os.getenv("FRONTEND_ORIGINS", "http://localhost:5173").split(",")
+    for origin in os.getenv(
+        "FRONTEND_ORIGINS",
+        "http://localhost:5173,https://truequetec.vercel.app",
+    ).split(",")
     if origin.strip()
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=frontend_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_methods=["*"],
     allow_headers=["*"],
 )
