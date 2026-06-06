@@ -48,6 +48,10 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
 def _parse_item_ids(raw: str) -> list[str]:
     try:
         data = json.loads(raw or "[]")
@@ -195,7 +199,7 @@ async def update_swap_offer(
 
     swap.offered_item_ids = json.dumps(data.offered_item_ids)
     swap.status = "awaiting"
-    swap.updated_at = datetime.now(timezone.utc)
+    swap.updated_at = utc_now()
     session.add(swap)
     await session.commit()
     await session.refresh(swap)
@@ -229,7 +233,7 @@ async def update_swap_status(
         raise HTTPException(status_code=400, detail="Solo los trueques aceptados se pueden confirmar como recibidos")
 
     swap.status = data.status
-    swap.updated_at = datetime.now(timezone.utc)
+    swap.updated_at = utc_now()
     session.add(swap)
     await session.commit()
     await session.refresh(swap)
@@ -263,7 +267,7 @@ async def create_message(
         raise HTTPException(status_code=400, detail="El mensaje no puede estar vacío")
 
     message = Message(swap_id=swap_id, sender_id=data.sender_id, body=data.body.strip())
-    swap.updated_at = datetime.now(timezone.utc)
+    swap.updated_at = utc_now()
     session.add(message)
     session.add(swap)
     await session.commit()

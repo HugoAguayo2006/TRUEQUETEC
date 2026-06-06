@@ -197,7 +197,7 @@ export default function DiscoverScreen({ onSwapRequested }: Props) {
 					className="w-[60px] h-[60px] rounded-2xl flex items-center justify-center transition-all active:scale-90"
 					style={{ background: "#111820", border: "1.5px solid rgba(255,58,92,0.2)" }}
 				>
-					<X size={24} style={{ color: "#FF3A5C" }} />
+					<X size={24} style={{ color: "#f62e50" }} />
 				</button>
 
 				<button

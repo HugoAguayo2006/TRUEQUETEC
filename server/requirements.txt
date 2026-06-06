@@ -5,6 +5,7 @@ pydantic
 scalar_fastapi
 python-dotenv
 aiosqlite
+asyncpg
 sqlmodel
 cloudinary 
 python-multipart

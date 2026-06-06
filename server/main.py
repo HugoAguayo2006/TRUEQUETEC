@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
 import sys
+import os
 
 SERVER_DIR = Path(__file__).resolve().parent
 if str(SERVER_DIR) not in sys.path:
@@ -27,13 +28,26 @@ app.include_router(item_router)
 app.include_router(swap_router)
 app.include_router(pricing_router)
 
+frontend_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "FRONTEND_ORIGINS",
+        "http://localhost:5173,https://truequetec.vercel.app",
+    ).split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    # allow_origins=["http://localhost:5173"],
-    allow_origins=["*"],
+    allow_origins=frontend_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/", include_in_schema=False)
+def healthcheck():
+    return {"status": "ok", "service": "truquetec-api"}
 
 @app.get("/scalar", include_in_schema=True)
 def get_docs_scalar():
