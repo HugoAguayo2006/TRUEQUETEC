@@ -3,6 +3,11 @@ from datetime import datetime, timezone
 from typing import Optional
 from sqlmodel import Field, SQLModel
 
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
 class User(SQLModel, table=True):
     __tablename__: str = "users"
     id: str = Field(
@@ -43,7 +48,7 @@ class Swipe(SQLModel, table=True):
     item_id: str = Field(foreign_key="items.id", nullable=False)
     direction: str = Field(nullable=False)
     timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
+        default_factory=utc_now
     )
 
 
@@ -60,10 +65,10 @@ class Swap(SQLModel, table=True):
     offered_item_ids: str = Field(default="[]", nullable=False)
     status: str = Field(default="pending", nullable=False)
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
+        default_factory=utc_now
     )
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
+        default_factory=utc_now
     )
 
 
@@ -78,7 +83,7 @@ class Message(SQLModel, table=True):
     sender_id: str = Field(foreign_key="users.id", nullable=False)
     body: str = Field(nullable=False)
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
+        default_factory=utc_now
     )
 
 
@@ -95,5 +100,5 @@ class SwapRating(SQLModel, table=True):
     rating: int = Field(nullable=False)
     note: str = Field(default="", nullable=True)
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
+        default_factory=utc_now
     )
