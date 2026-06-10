@@ -42,7 +42,7 @@ class ItemCreate(SQLModel):
 
 class ItemRead(SQLModel):
     id: str
-    owner_id: str
+    owner_id: str | None = None
     title: str
     estimated_value: float
 
@@ -55,7 +55,7 @@ class ItemUpdate(SQLModel):
 
 class ItemResponse(SQLModel):
     id: str
-    owner_id: str
+    owner_id: str | None = None
     title: str
     estimated_value: float
     image_url: str
