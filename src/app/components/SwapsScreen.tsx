@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { RefreshCw, Clock, CheckCircle, XCircle, ChevronRight, Star, ArrowLeft, Check } from "lucide-react";
 import React from "react";
 import { api, ItemResponseData, SwapResponseData } from "../../services/endpoints";
@@ -111,6 +111,7 @@ export default function SwapsScreen({ isActive = false, latestSwap, onRate }: Pr
 	const [rated, setRated] = useState<string[]>([]);
 	const [pickingSwap, setPickingSwap] = useState<SwapResponseData | null>(null);
 	const [selectedOfferIds, setSelectedOfferIds] = useState<string[]>([]);
+	const reconnectTimerRef = useRef<number | null>(null);
 	const { user } = useAuth();
 	const { execute, isLoading, data: swaps, error, setData: setSwaps } = useApi<SwapResponseData[]>();
 	const { execute: updateStatus } = useApi<SwapResponseData>();
@@ -143,10 +144,50 @@ export default function SwapsScreen({ isActive = false, latestSwap, onRate }: Pr
 
 	useEffect(() => {
 		if (!user?.id) return;
-		const socket = new WebSocket(`${WS_BASE_URL}/swaps/ws/${user.id}`);
-		socket.onmessage = () => fetchSwaps();
-		return () => socket.close();
+		let socket: WebSocket | null = null;
+		let shouldReconnect = true;
+		let heartbeatId: number | null = null;
+
+		function connect() {
+			socket = new WebSocket(`${WS_BASE_URL}/swaps/ws/${user.id}`);
+			socket.onopen = () => {
+				heartbeatId = window.setInterval(() => {
+					if (socket?.readyState === WebSocket.OPEN) {
+						socket.send("ping");
+					}
+				}, 25000);
+			};
+			socket.onmessage = () => fetchSwaps();
+			socket.onclose = () => {
+				if (heartbeatId) {
+					window.clearInterval(heartbeatId);
+					heartbeatId = null;
+				}
+				if (!shouldReconnect) return;
+				reconnectTimerRef.current = window.setTimeout(connect, 1500);
+			};
+			socket.onerror = () => socket?.close();
+		}
+
+		connect();
+
+		return () => {
+			shouldReconnect = false;
+			if (reconnectTimerRef.current) {
+				window.clearTimeout(reconnectTimerRef.current);
+			}
+			if (heartbeatId) {
+				window.clearInterval(heartbeatId);
+			}
+			socket?.close();
+		};
 	}, [fetchSwaps, user?.id]);
+
+	useEffect(() => {
+		if (!isActive) return;
+		const intervalId = window.setInterval(fetchSwaps, 4000);
+		return () => window.clearInterval(intervalId);
+	}, [fetchSwaps, isActive]);
 
 	useEffect(() => {
 		if (!pickingSwap) return;
