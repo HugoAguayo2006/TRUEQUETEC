@@ -2,7 +2,7 @@
 
 TRUEQUETEC es una aplicacion web full stack para publicar articulos, descubrir objetos de otros usuarios y proponer trueques de forma digital. El sistema permite crear cuentas, subir publicaciones con imagen, estimar precios de referencia, iniciar solicitudes de intercambio, negociar ofertas, chatear dentro de cada trueque y calificar a la otra persona cuando el intercambio termina.
 
-El proyecto esta pensado como una plataforma de intercambio estudiantil: el frontend ofrece una experiencia tipo marketplace movil, mientras que el backend expone una API REST y WebSockets para manejar usuarios, articulos, trueques, mensajes, calificaciones y estimaciones de precio.
+El proyecto esta pensado como una plataforma de intercambio estudiantil: el frontend ofrece una experiencia tipo marketplace, mientras que el backend expone una API REST y WebSockets para manejar usuarios, articulos, trueques, mensajes, calificaciones y estimaciones de precio.
 
 ## Tabla de contenidos
 
