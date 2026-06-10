@@ -43,9 +43,12 @@ export default function ProfileScreen({ isActive = false }: Props) {
 		}
 	}, [fetchSwaps, user?.id]);
 
-	const fetchReviews = React.useCallback(async () => {
+	const fetchReviews = React.useCallback(async (options?: { silent?: boolean }) => {
 		if (!user?.id) return;
-		setReviewsLoading(true);
+		const shouldShowLoading = !options?.silent && reviews.length === 0;
+		if (shouldShowLoading) {
+			setReviewsLoading(true);
+		}
 		setReviewsError(null);
 		try {
 			const receivedReviews = await api.getReceivedRatings(user.id);
@@ -53,15 +56,17 @@ export default function ProfileScreen({ isActive = false }: Props) {
 		} catch (err: any) {
 			setReviewsError(err.message || "No se pudieron cargar las reseñas.");
 		} finally {
-			setReviewsLoading(false);
+			if (shouldShowLoading) {
+				setReviewsLoading(false);
+			}
 		}
-	}, [user?.id]);
+	}, [reviews.length, user?.id]);
 
-	const refreshProfile = React.useCallback(() => {
+	const refreshProfile = React.useCallback((options?: { silent?: boolean }) => {
 		fetchFreshUser();
 		fetchUserItems();
 		fetchUserSwaps();
-		fetchReviews();
+		fetchReviews({ silent: options?.silent });
 	}, [fetchFreshUser, fetchUserItems, fetchUserSwaps, fetchReviews]);
 
 	useEffect(() => {
@@ -76,7 +81,7 @@ export default function ProfileScreen({ isActive = false }: Props) {
 
 	useEffect(() => {
 		if (!isActive) return;
-		const intervalId = window.setInterval(refreshProfile, 4000);
+		const intervalId = window.setInterval(() => refreshProfile({ silent: true }), 4000);
 		return () => window.clearInterval(intervalId);
 	}, [isActive, refreshProfile]);
 
