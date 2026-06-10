@@ -8,12 +8,13 @@ import ProductPrice from "./ProductPrice";
 
 interface Props {
 	isActive?: boolean;
+	currentIndex?: number;
+	onIndexChange?: (index: number) => void;
 	onSwapRequested?: (swap: SwapResponseData) => void;
 	onViewOwner?: (userId: string) => void;
 }
 
-export default function DiscoverScreen({ isActive = false, onSwapRequested, onViewOwner }: Props) {
-	const [currentIdx, setCurrentIdx] = useState(0);
+export default function DiscoverScreen({ isActive = false, currentIndex = 0, onIndexChange, onSwapRequested, onViewOwner }: Props) {
 	const [dragX, setDragX] = useState(0);
 	const [isDragging, setIsDragging] = useState(false);
 	const [exiting, setExiting] = useState<"left" | "right" | null>(null);
@@ -26,7 +27,12 @@ export default function DiscoverScreen({ isActive = false, onSwapRequested, onVi
 	const fetch_items = React.useCallback(() => {
 		if (user?.id) execute(() => api.getItems(user.id));
 	}, [execute, user?.id]);
-	const currentItem = items?.[currentIdx] || null;
+	const currentItem = items?.[currentIndex] || null;
+
+	function setCurrentIndex(nextIndex: number | ((currentIndex: number) => number)) {
+		const resolvedIndex = typeof nextIndex === "function" ? nextIndex(currentIndex) : nextIndex;
+		onIndexChange?.(resolvedIndex);
+	}
 
 	useEffect(() => { fetch_items(); }, [fetch_items])
 
@@ -74,7 +80,7 @@ export default function DiscoverScreen({ isActive = false, onSwapRequested, onVi
 		);
 	}
 
-	if (!items?.length || currentIdx >= items.length) {
+	if (!items?.length || currentIndex >= items.length) {
 		return (
 			<div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center" style={{ background: "#080C12" }}>
 				<Heart size={32} style={{ color: "#1A2230" }} />
@@ -84,7 +90,7 @@ export default function DiscoverScreen({ isActive = false, onSwapRequested, onVi
 	}
 
 	const item = currentItem;
-	const nextItem = items[currentIdx + 1];
+	const nextItem = items[currentIndex + 1];
 
 	const rotation = dragX * 0.06;
 	const wantOpacity = Math.min(Math.max(dragX / 90, 0), 1);
@@ -116,7 +122,7 @@ export default function DiscoverScreen({ isActive = false, onSwapRequested, onVi
 				onSwapRequested?.(swap);
 				setDragX(0);
 				setExiting(null);
-				setCurrentIdx((i) => i + 1);
+				setCurrentIndex((i) => i + 1);
 			}, 280);
 		} catch {
 			setDragX(0);
@@ -129,7 +135,7 @@ export default function DiscoverScreen({ isActive = false, onSwapRequested, onVi
 		setTimeout(() => {
 			setDragX(0);
 			setExiting(null);
-			setCurrentIdx((i) => i + 1);
+			setCurrentIndex((i) => i + 1);
 		}, 280);
 	}
 
