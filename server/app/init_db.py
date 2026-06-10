@@ -3,6 +3,7 @@ import app.models  # noqa: F401 - register SQLModel tables before create_all
 from sqlmodel import SQLModel
 from sqlalchemy import inspect, text
 import hashlib
+import json
 import os
 
 PASSWORD_ITERATIONS = 210_000
@@ -25,6 +26,22 @@ async def init_db():
             await conn.execute(
                 text(f"ALTER TABLE items ADD COLUMN is_available BOOLEAN NOT NULL DEFAULT {default_value}")
             )
+
+        completed_swaps = await conn.execute(
+            text("SELECT wanted_item_id, offered_item_ids FROM swaps WHERE status = 'completed'")
+        )
+        for swap in completed_swaps.fetchall():
+            item_ids = [swap.wanted_item_id]
+            try:
+                item_ids.extend(str(item_id) for item_id in json.loads(swap.offered_item_ids or "[]") if item_id)
+            except json.JSONDecodeError:
+                pass
+
+            for item_id in item_ids:
+                await conn.execute(
+                    text("UPDATE items SET is_available = :is_available WHERE id = :item_id"),
+                    {"is_available": True, "item_id": item_id},
+                )
 
         user_columns = await conn.run_sync(
             lambda sync_conn: {column["name"] for column in inspect(sync_conn).get_columns("users")}

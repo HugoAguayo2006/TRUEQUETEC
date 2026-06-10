@@ -7,6 +7,7 @@ import DiscoverScreen from "./components/DiscoverScreen";
 import SwapsScreen from "./components/SwapsScreen";
 import MessagesScreen from "./components/MessagesScreen";
 import ProfileScreen from "./components/ProfileScreen";
+import PublicProfileScreen from "./components/PublicProfileScreen";
 import RateSwapScreen from "./components/RateSwapScreen";
 import AdminScreen from "./components/AdminScreen";
 import React from "react";
@@ -14,7 +15,7 @@ import { api, ItemResponseData, SwapResponseData } from "../services/endpoints";
 import { useAuth } from "../context/AuthContext";
 
 type AuthScreen = "onboarding" | "login" | "signup";
-type FlowScreen = "rate-swap";
+type FlowScreen = "rate-swap" | "public-profile";
 
 type NavTab = "discover" | "swaps" | "messages" | "profile";
 
@@ -44,6 +45,7 @@ export default function App() {
 	const [flow, setFlow] = useState<FlowScreen | null>(null);
 	const [ratingSwap, setRatingSwap] = useState<SwapResponseData | null>(null);
 	const [latestSwap, setLatestSwap] = useState<SwapResponseData | null>(null);
+	const [viewingUserId, setViewingUserId] = useState<string | null>(null);
 
 	function handleSwapRequested(swap: SwapResponseData) {
 		setLatestSwap(swap);
@@ -53,11 +55,17 @@ export default function App() {
 	function exitFlow() {
 		setFlow(null);
 		setRatingSwap(null);
+		setViewingUserId(null);
 	}
 
 	function handleRateSwap(swap: SwapResponseData) {
 		setRatingSwap(swap);
 		setFlow("rate-swap");
+	}
+
+	function handleViewOwner(userId: string) {
+		setViewingUserId(userId);
+		setFlow("public-profile");
 	}
 
 	function getRatingPayload() {
@@ -130,10 +138,21 @@ export default function App() {
 					/>
 				)}
 
+				{inFlow && flow === "public-profile" && viewingUserId && (
+					<PublicProfileScreen
+						userId={viewingUserId}
+						onBack={exitFlow}
+					/>
+				)}
+
 				{!inFlow && (
 					<>
 						<div className={`h-full ${tab === "discover" ? "block" : "hidden"}`}>
-							<DiscoverScreen isActive={tab === "discover"} onSwapRequested={handleSwapRequested} />
+							<DiscoverScreen
+								isActive={tab === "discover"}
+								onSwapRequested={handleSwapRequested}
+								onViewOwner={handleViewOwner}
+							/>
 						</div>
 						<div className={`h-full overflow-y-auto ${tab === "swaps" ? "block" : "hidden"}`}>
 							<SwapsScreen isActive={tab === "swaps"} latestSwap={latestSwap} onRate={handleRateSwap} />

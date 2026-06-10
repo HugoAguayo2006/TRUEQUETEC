@@ -79,6 +79,15 @@ async def _transfer_swap_items(swap: Swap, session: AsyncSession):
         session.add(offered_item)
 
 
+async def _set_swap_items_availability(swap: Swap, session: AsyncSession, is_available: bool):
+    item_ids = [swap.wanted_item_id, *_parse_item_ids(swap.offered_item_ids)]
+    for item_id in item_ids:
+        item = await session.get(Item, item_id)
+        if item:
+            item.is_available = is_available
+            session.add(item)
+
+
 async def _get_swap_response(
     swap: Swap,
     session: AsyncSession,
@@ -230,8 +239,10 @@ async def update_swap_status(
             raise HTTPException(status_code=400, detail="No puedes aceptar un trueque sin artículos ofrecidos")
         await _transfer_swap_items(swap, session)
 
-    if data.status == "completed" and swap.status != "accepted":
-        raise HTTPException(status_code=400, detail="Solo los trueques aceptados se pueden confirmar como recibidos")
+    if data.status == "completed":
+        if swap.status != "accepted":
+            raise HTTPException(status_code=400, detail="Solo los trueques aceptados se pueden confirmar como recibidos")
+        await _set_swap_items_availability(swap, session, True)
 
     swap.status = data.status
     swap.updated_at = utc_now()
