@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="title desc">
+  <title id="title">TRUEQUETEC database diagram</title>
+  <desc id="desc">Entity relationship diagram for users, items, swipes, swaps, messages, and swap ratings.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .grid { stroke: #e2e8f0; stroke-width: 1; }
+      .box { fill: #ffffff; stroke: #0f172a; stroke-width: 2; rx: 14; }
+      .head { fill: #0f766e; }
+      .head-blue { fill: #2563eb; }
+      .head-purple { fill: #7c3aed; }
+      .head-orange { fill: #ea580c; }
+      .head-red { fill: #dc2626; }
+      .title { fill: #ffffff; font: 700 22px Arial, sans-serif; }
+      .text { fill: #111827; font: 18px Arial, sans-serif; }
+      .small { fill: #334155; font: 16px Arial, sans-serif; }
+      .line { stroke: #111827; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+    </style>
+    <pattern id="smallGrid" width="28" height="28" patternUnits="userSpaceOnUse">
+      <path d="M 28 0 L 0 0 0 28" class="grid"/>
+    </pattern>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#111827"/>
+    </marker>
+  </defs>
+
+  <rect width="1400" height="900" class="bg"/>
+  <rect width="1400" height="900" fill="url(#smallGrid)" opacity="0.65"/>
+
+  <path class="line" d="M390 285 C520 245 605 215 710 195"/>
+  <path class="line" d="M390 375 C520 480 555 590 665 672"/>
+  <path class="line" d="M965 270 C1040 300 1080 332 1120 370"/>
+  <path class="line" d="M910 470 C965 520 1010 580 1080 650"/>
+  <path class="line" d="M965 175 C1050 220 1085 285 1120 370"/>
+  <path class="line" d="M390 540 C500 620 565 690 665 715"/>
+  <path class="line" d="M390 645 C505 665 560 670 665 672"/>
+
+  <g transform="translate(90 155)">
+    <rect class="box" width="300" height="285"/>
+    <rect class="head-blue" width="300" height="54" rx="14"/>
+    <text class="title" x="24" y="35">users</text>
+    <text class="text" x="24" y="88">id varchar PK</text>
+    <text class="text" x="24" y="119">username unique</text>
+    <text class="text" x="24" y="150">email unique</text>
+    <text class="text" x="24" y="181">rating float</text>
+    <text class="text" x="24" y="212">bio text</text>
+    <text class="text" x="24" y="243">password_hash</text>
+    <text class="text" x="24" y="274">role user/admin</text>
+  </g>
+
+  <g transform="translate(710 95)">
+    <rect class="box" width="300" height="250"/>
+    <rect class="head" width="300" height="54" rx="14"/>
+    <text class="title" x="24" y="35">items</text>
+    <text class="text" x="24" y="88">id varchar PK</text>
+    <text class="text" x="24" y="119">owner_id FK users</text>
+    <text class="text" x="24" y="150">title</text>
+    <text class="text" x="24" y="181">estimated_value</text>
+    <text class="text" x="24" y="212">image_url</text>
+    <text class="text" x="24" y="243">is_available</text>
+  </g>
+
+  <g transform="translate(1110 330)">
+    <rect class="box" width="250" height="225"/>
+    <rect class="head-purple" width="250" height="54" rx="14"/>
+    <text class="title" x="24" y="35">swipes</text>
+    <text class="small" x="24" y="88">id PK</text>
+    <text class="small" x="24" y="117">owner_id FK users</text>
+    <text class="small" x="24" y="146">swiper_id FK users</text>
+    <text class="small" x="24" y="175">item_id FK items</text>
+    <text class="small" x="24" y="204">direction, timestamp</text>
+  </g>
+
+  <g transform="translate(665 575)">
+    <rect class="box" width="300" height="260"/>
+    <rect class="head-purple" width="300" height="54" rx="14"/>
+    <text class="title" x="24" y="35">swaps</text>
+    <text class="text" x="24" y="88">id varchar PK</text>
+    <text class="text" x="24" y="119">requester_id FK users</text>
+    <text class="text" x="24" y="150">owner_id FK users</text>
+    <text class="text" x="24" y="181">wanted_item_id FK items</text>
+    <text class="text" x="24" y="212">offered_item_ids JSON</text>
+    <text class="text" x="24" y="243">status, timestamps</text>
+  </g>
+
+  <g transform="translate(1080 640)">
+    <rect class="box" width="280" height="205"/>
+    <rect class="head-orange" width="280" height="54" rx="14"/>
+    <text class="title" x="24" y="35">messages</text>
+    <text class="text" x="24" y="88">id varchar PK</text>
+    <text class="text" x="24" y="119">swap_id FK swaps</text>
+    <text class="text" x="24" y="150">sender_id FK users</text>
+    <text class="text" x="24" y="181">body, created_at</text>
+  </g>
+
+  <g transform="translate(90 515)">
+    <rect class="box" width="300" height="260"/>
+    <rect class="head-red" width="300" height="54" rx="14"/>
+    <text class="title" x="24" y="35">swap_ratings</text>
+    <text class="text" x="24" y="88">id varchar PK</text>
+    <text class="text" x="24" y="119">swap_id FK swaps</text>
+    <text class="text" x="24" y="150">rater_id FK users</text>
+    <text class="text" x="24" y="181">rated_user_id FK users</text>
+    <text class="text" x="24" y="212">rating int</text>
+    <text class="text" x="24" y="243">note, created_at</text>
+  </g>
+</svg>

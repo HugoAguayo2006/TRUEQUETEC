@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">Neon database deployment</title>
+  <desc id="desc">Database card for TRUEQUETEC production database hosted on Neon.</desc>
+  <rect width="1200" height="680" fill="#111827"/>
+  <rect x="70" y="70" width="1060" height="540" rx="18" fill="#18181b" stroke="#3f3f46" stroke-width="2"/>
+  <text x="105" y="130" fill="#ffffff" font-family="Arial, sans-serif" font-size="30" font-weight="700">Neon - Base de datos</text>
+  <text x="105" y="190" fill="#34d399" font-family="Arial, sans-serif" font-size="24" font-weight="700">PostgreSQL / production</text>
+  <g transform="translate(105 245)">
+    <rect width="990" height="60" fill="#27272a"/>
+    <text x="24" y="38" fill="#f4f4f5" font-family="Arial, sans-serif" font-size="22">users</text>
+    <rect y="60" width="990" height="60" fill="#1f2937"/>
+    <text x="24" y="98" fill="#f4f4f5" font-family="Arial, sans-serif" font-size="22">items</text>
+    <rect y="120" width="990" height="60" fill="#27272a"/>
+    <text x="24" y="158" fill="#f4f4f5" font-family="Arial, sans-serif" font-size="22">swaps</text>
+    <rect y="180" width="990" height="60" fill="#1f2937"/>
+    <text x="24" y="218" fill="#f4f4f5" font-family="Arial, sans-serif" font-size="22">messages</text>
+    <rect y="240" width="990" height="60" fill="#27272a"/>
+    <text x="24" y="278" fill="#f4f4f5" font-family="Arial, sans-serif" font-size="22">swap_ratings</text>
+  </g>
+  <text x="105" y="590" fill="#d1d5db" font-family="Arial, sans-serif" font-size="22">Base de datos implementada y conectada al backend en produccion.</text>
+</svg>
