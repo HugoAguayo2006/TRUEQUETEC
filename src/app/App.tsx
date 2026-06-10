@@ -139,7 +139,7 @@ export default function App() {
 							<SwapsScreen isActive={tab === "swaps"} latestSwap={latestSwap} onRate={handleRateSwap} />
 						</div>
 						<div className={`h-full overflow-y-auto ${tab === "messages" ? "block" : "hidden"}`}>
-							<MessagesScreen />
+							<MessagesScreen isActive={tab === "messages"} />
 						</div>
 						<div className={`h-full overflow-y-auto ${tab === "profile" ? "block" : "hidden"}`}>
 							<ProfileScreen isActive={tab === "profile"} />
