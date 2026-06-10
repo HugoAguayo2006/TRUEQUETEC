@@ -16,6 +16,7 @@ export default function AdminScreen() {
 	const [pendingDelete, setPendingDelete] = useState<ItemResponseData | null>(null);
 	const [pendingReviewDelete, setPendingReviewDelete] = useState<SwapRatingDetailResponseData | null>(null);
 	const [error, setError] = useState<string | null>(null);
+	const [ratingsError, setRatingsError] = useState<string | null>(null);
 
 	const usersById = useMemo(() => {
 		return new Map(users.map((currentUser) => [currentUser.id, currentUser]));
@@ -24,15 +25,22 @@ export default function AdminScreen() {
 	async function loadAdminData() {
 		setIsLoading(true);
 		setError(null);
+		setRatingsError(null);
 		try {
-			const [allItems, allUsers, allRatings] = await Promise.all([
+			const [allItems, allUsers] = await Promise.all([
 				api.getAdminItems(),
 				api.getUsers(),
-				api.getAllRatings(),
 			]);
 			setItems(allItems);
 			setUsers(allUsers);
-			setRatings(allRatings);
+
+			try {
+				const allRatings = await api.getAllRatings();
+				setRatings(allRatings);
+			} catch (ratingsErr: any) {
+				setRatings([]);
+				setRatingsError(ratingsErr.message || "No se pudieron cargar las reseñas.");
+			}
 		} catch (err: any) {
 			setError(err.message || "No se pudo cargar el panel de administración.");
 		} finally {
@@ -152,6 +160,12 @@ export default function AdminScreen() {
 				{error && (
 					<div className="mb-4 rounded-2xl px-4 py-3 text-xs" style={{ background: "rgba(255,58,92,0.1)", color: "#FF3A5C", border: "1px solid rgba(255,58,92,0.22)" }}>
 						{error}
+					</div>
+				)}
+
+				{view === "reviews" && ratingsError && (
+					<div className="mb-4 rounded-2xl px-4 py-3 text-xs" style={{ background: "rgba(255,58,92,0.1)", color: "#FF3A5C", border: "1px solid rgba(255,58,92,0.22)" }}>
+						{ratingsError}
 					</div>
 				)}
 
