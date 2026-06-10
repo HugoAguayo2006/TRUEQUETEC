@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { X, Heart } from "lucide-react";
 import React from "react";
-import { api, ItemResponseData, SwapResponseData } from "../../services/endpoints";
+import { api, ItemResponseData, SwapResponseData, UserResponseData } from "../../services/endpoints";
 import { useApi } from "../../hooks/use_api";
 import { useAuth } from "../../context/AuthContext";
 import ProductPrice from "./ProductPrice";
@@ -9,13 +9,15 @@ import ProductPrice from "./ProductPrice";
 interface Props {
 	isActive?: boolean;
 	onSwapRequested?: (swap: SwapResponseData) => void;
+	onViewOwner?: (userId: string) => void;
 }
 
-export default function DiscoverScreen({ isActive = false, onSwapRequested }: Props) {
+export default function DiscoverScreen({ isActive = false, onSwapRequested, onViewOwner }: Props) {
 	const [currentIdx, setCurrentIdx] = useState(0);
 	const [dragX, setDragX] = useState(0);
 	const [isDragging, setIsDragging] = useState(false);
 	const [exiting, setExiting] = useState<"left" | "right" | null>(null);
+	const [owner, setOwner] = useState<UserResponseData | null>(null);
 	const dragStartX = useRef(0);
 
 	const { user } = useAuth();
@@ -24,6 +26,7 @@ export default function DiscoverScreen({ isActive = false, onSwapRequested }: Pr
 	const fetch_items = React.useCallback(() => {
 		if (user?.id) execute(() => api.getItems(user.id));
 	}, [execute, user?.id]);
+	const currentItem = items?.[currentIdx] || null;
 
 	useEffect(() => { fetch_items(); }, [fetch_items])
 
@@ -32,6 +35,26 @@ export default function DiscoverScreen({ isActive = false, onSwapRequested }: Pr
 			fetch_items();
 		}
 	}, [fetch_items, isActive]);
+
+	useEffect(() => {
+		let cancelled = false;
+		if (!currentItem?.owner_id) {
+			setOwner(null);
+			return;
+		}
+
+		api.getUser(currentItem.owner_id)
+			.then((ownerData) => {
+				if (!cancelled) setOwner(ownerData);
+			})
+			.catch(() => {
+				if (!cancelled) setOwner(null);
+			});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [currentItem?.owner_id]);
 
 	if (!user) return null;
 
@@ -60,7 +83,7 @@ export default function DiscoverScreen({ isActive = false, onSwapRequested }: Pr
 		);
 	}
 
-	const item = items[currentIdx];
+	const item = currentItem;
 	const nextItem = items[currentIdx + 1];
 
 	const rotation = dragX * 0.06;
@@ -108,6 +131,13 @@ export default function DiscoverScreen({ isActive = false, onSwapRequested }: Pr
 			setExiting(null);
 			setCurrentIdx((i) => i + 1);
 		}, 280);
+	}
+
+	function openOwnerProfile(e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) {
+		e.stopPropagation();
+		if (item.owner_id) {
+			onViewOwner?.(item.owner_id);
+		}
 	}
 
 
@@ -185,7 +215,15 @@ export default function DiscoverScreen({ isActive = false, onSwapRequested }: Pr
 							<div>
 								<h2 className="text-white text-[22px] font-bold leading-tight mb-1">{item.title}</h2>
 								<div className="flex items-center gap-2">
-									<span className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>Publicado por su dueño</span>
+									<button
+										onMouseDown={(e) => e.stopPropagation()}
+										onTouchStart={(e) => e.stopPropagation()}
+										onClick={openOwnerProfile}
+										className="text-sm font-semibold text-left transition-colors"
+										style={{ color: "rgba(255,255,255,0.72)" }}
+									>
+										Publicado por {owner?.username || "su dueño"}
+									</button>
 								</div>
 							</div>
 							<div className="text-right">
