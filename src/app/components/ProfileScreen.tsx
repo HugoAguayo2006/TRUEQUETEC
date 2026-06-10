@@ -24,6 +24,7 @@ export default function ProfileScreen({ isActive = false }: Props) {
 	const [reviews, setReviews] = useState<SwapRatingDetailResponseData[]>([]);
 	const [reviewsLoading, setReviewsLoading] = useState(false);
 	const [reviewsError, setReviewsError] = useState<string | null>(null);
+	const [itemsCount, setItemsCount] = useState(0);
 
 	const fetchUserItems = React.useCallback(() => {
 		if (user?.id) {
@@ -68,6 +69,12 @@ export default function ProfileScreen({ isActive = false }: Props) {
 		fetchUserSwaps();
 		fetchReviews({ silent: options?.silent });
 	}, [fetchFreshUser, fetchUserItems, fetchUserSwaps, fetchReviews]);
+
+	useEffect(() => {
+		if (items) {
+			setItemsCount(items.length);
+		}
+	}, [items]);
 
 	useEffect(() => {
 		refreshProfile();
@@ -171,7 +178,7 @@ export default function ProfileScreen({ isActive = false }: Props) {
 				<div className="grid grid-cols-2 gap-2 mb-5">
 					{[
 						{ label: "Trueques", value: swaps?.filter((swap) => swap.status === "completed").length || 0 },
-						{ label: "Publicados", value: isLoading ? "..." : items?.length || 0 },
+						{ label: "Publicados", value: isLoading && !items ? "..." : itemsCount },
 					].map((s) => (
 						<div key={s.label} className="flex flex-col items-center py-3 rounded-2xl" style={{ background: "#111820" }}>
 							<span className="text-xl font-extrabold" style={{ color: "#EEF2F7" }}>{s.value}</span>

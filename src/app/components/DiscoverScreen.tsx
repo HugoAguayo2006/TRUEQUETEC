@@ -219,7 +219,7 @@ export default function DiscoverScreen({ isActive = false, onSwapRequested, onVi
 										onMouseDown={(e) => e.stopPropagation()}
 										onTouchStart={(e) => e.stopPropagation()}
 										onClick={openOwnerProfile}
-										className="text-sm font-semibold text-left transition-colors"
+										className="text-sm font-semibold text-left transition-colors cursor-pointer hover:underline focus-visible:underline outline-none"
 										style={{ color: "rgba(255,255,255,0.72)" }}
 									>
 										Publicado por {owner?.username || "su dueño"}
