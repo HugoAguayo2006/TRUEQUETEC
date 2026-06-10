@@ -103,6 +103,9 @@ class SwapRatingResponse(SQLModel):
     created_at: datetime
     rated_user: UserResponse
 
+class SwapRatingDetailResponse(SwapRatingResponse):
+    rater: UserResponse
+
 class SwapResponse(SQLModel):
     id: str
     requester_id: str

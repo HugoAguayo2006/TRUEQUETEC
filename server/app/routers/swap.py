@@ -2,13 +2,14 @@ import json
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, WebSocket, WebSocketDisconnect, status
 from app.database import AsyncSession, get_db
 from app.models import Item, Message, Swap, SwapRating, User
 from app.schemas import (
     MessageCreate,
     MessageResponse,
     SwapRatingCreate,
+    SwapRatingDetailResponse,
     SwapRatingResponse,
     SwapCreate,
     SwapOfferUpdate,
@@ -308,6 +309,74 @@ async def _recalculate_user_rating(user_id: str, session: AsyncSession) -> User:
     await session.commit()
     await session.refresh(user)
     return user
+
+
+async def _require_admin(request: Request, session: AsyncSession) -> User:
+    current_user_id = request.headers.get("X-User-Id")
+    if not current_user_id:
+        raise HTTPException(status_code=401, detail="Falta usuario actual")
+
+    current_user = await session.get(User, current_user_id)
+    if current_user is None or current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Solo administradores pueden administrar reseñas")
+
+    return current_user
+
+
+async def _rating_detail(rating: SwapRating, session: AsyncSession) -> SwapRatingDetailResponse:
+    rated_user = await session.get(User, rating.rated_user_id)
+    rater = await session.get(User, rating.rater_id)
+    if not rated_user or not rater:
+        raise HTTPException(status_code=404, detail="Usuario de la reseña no encontrado")
+
+    return SwapRatingDetailResponse(
+        id=rating.id,
+        swap_id=rating.swap_id,
+        rater_id=rating.rater_id,
+        rated_user_id=rating.rated_user_id,
+        rating=rating.rating,
+        note=rating.note or "",
+        created_at=rating.created_at,
+        rated_user=rated_user,
+        rater=rater,
+    )
+
+
+@swap_router.get("/ratings", response_model=List[SwapRatingDetailResponse], summary="Obtener todas las reseñas")
+async def get_all_ratings(request: Request, session: AsyncSession = Depends(get_db)):
+    await _require_admin(request, session)
+    result = await session.execute(select(SwapRating).order_by(SwapRating.created_at.desc()))
+    ratings = result.scalars().all()
+    return [await _rating_detail(rating, session) for rating in ratings]
+
+
+@swap_router.get("/ratings/received/{user_id}", response_model=List[SwapRatingDetailResponse], summary="Obtener reseñas recibidas por usuario")
+async def get_received_ratings(user_id: str, session: AsyncSession = Depends(get_db)):
+    result = await session.execute(
+        select(SwapRating)
+        .where(SwapRating.rated_user_id == user_id)
+        .order_by(SwapRating.created_at.desc())
+    )
+    ratings = result.scalars().all()
+    return [await _rating_detail(rating, session) for rating in ratings]
+
+
+@swap_router.delete("/ratings/{rating_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Borrar una reseña")
+async def delete_rating(
+    rating_id: str,
+    request: Request,
+    session: AsyncSession = Depends(get_db),
+):
+    await _require_admin(request, session)
+    rating = await session.get(SwapRating, rating_id)
+    if not rating:
+        raise HTTPException(status_code=404, detail="Reseña no encontrada")
+
+    rated_user_id = rating.rated_user_id
+    await session.delete(rating)
+    await session.commit()
+    await _recalculate_user_rating(rated_user_id, session)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @swap_router.post("/{swap_id}/ratings", response_model=SwapRatingResponse, status_code=201, summary="Calificar un trueque completado")
