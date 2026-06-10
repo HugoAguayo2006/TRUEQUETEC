@@ -74,6 +74,12 @@ export default function ProfileScreen({ isActive = false }: Props) {
 		}
 	}, [isActive, refreshProfile]);
 
+	useEffect(() => {
+		if (!isActive) return;
+		const intervalId = window.setInterval(refreshProfile, 4000);
+		return () => window.clearInterval(intervalId);
+	}, [isActive, refreshProfile]);
+
 	async function handlePublish(listing: { title: string; value: number; image_url: string }) {
 		try {
 			await createNewItem(() => api.createItem({

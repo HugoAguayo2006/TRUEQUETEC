@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, ArrowLeft, Send, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 import { api, MessageResponseData, SwapResponseData } from "../../services/endpoints";
 import { WS_BASE_URL } from "../../services/api_client";
@@ -44,14 +44,19 @@ function statusLabel(status: SwapResponseData["status"]) {
   return labels[status] || status;
 }
 
-export default function MessagesScreen() {
+interface Props {
+  isActive?: boolean;
+}
+
+export default function MessagesScreen({ isActive = false }: Props) {
   const [openSwap, setOpenSwap] = useState<SwapResponseData | null>(null);
   const [showSwapDetails, setShowSwapDetails] = useState(false);
   const [draft, setDraft] = useState("");
   const [query, setQuery] = useState("");
+  const reconnectTimerRef = useRef<number | null>(null);
   const { user } = useAuth();
   const { execute, isLoading, data: swaps, error } = useApi<SwapResponseData[]>();
-  const { execute: loadMessages, data: messages } = useApi<MessageResponseData[]>();
+  const { execute: loadMessages, data: messages, setData: setMessages } = useApi<MessageResponseData[]>();
   const { execute: sendMessage, isLoading: isSending } = useApi<MessageResponseData>();
 
   const fetchSwaps = useMemo(() => {
@@ -66,20 +71,73 @@ export default function MessagesScreen() {
 
   useEffect(() => {
     if (!user?.id) return;
-    const socket = new WebSocket(`${WS_BASE_URL}/swaps/ws/${user.id}`);
-    socket.onmessage = (event) => {
-      const payload = JSON.parse(event.data);
-      fetchSwaps();
-      if (payload.swap_id && payload.swap_id === openSwap?.id) {
-        loadMessages(() => api.getSwapMessages(payload.swap_id));
+    let socket: WebSocket | null = null;
+    let shouldReconnect = true;
+    let heartbeatId: number | null = null;
+
+    function connect() {
+      socket = new WebSocket(`${WS_BASE_URL}/swaps/ws/${user.id}`);
+      socket.onopen = () => {
+        heartbeatId = window.setInterval(() => {
+          if (socket?.readyState === WebSocket.OPEN) {
+            socket.send("ping");
+          }
+        }, 25000);
+      };
+      socket.onmessage = (event) => {
+        const payload = JSON.parse(event.data);
+        fetchSwaps();
+        if (payload.swap_id && payload.swap_id === openSwap?.id) {
+          loadMessages(() => api.getSwapMessages(payload.swap_id));
+        }
+      };
+      socket.onclose = () => {
+        if (heartbeatId) {
+          window.clearInterval(heartbeatId);
+          heartbeatId = null;
+        }
+        if (!shouldReconnect) return;
+        reconnectTimerRef.current = window.setTimeout(connect, 1500);
+      };
+      socket.onerror = () => socket?.close();
+    }
+
+    connect();
+
+    return () => {
+      shouldReconnect = false;
+      if (reconnectTimerRef.current) {
+        window.clearTimeout(reconnectTimerRef.current);
       }
+      if (heartbeatId) {
+        window.clearInterval(heartbeatId);
+      }
+      socket?.close();
     };
-    return () => socket.close();
   }, [fetchSwaps, loadMessages, openSwap?.id, user?.id]);
 
   useEffect(() => {
     if (openSwap?.id) loadMessages(() => api.getSwapMessages(openSwap.id));
   }, [loadMessages, openSwap?.id]);
+
+  useEffect(() => {
+    if (!isActive) return;
+    const intervalId = window.setInterval(() => {
+      fetchSwaps();
+      if (openSwap?.id) {
+        loadMessages(() => api.getSwapMessages(openSwap.id));
+      }
+    }, 4000);
+    return () => window.clearInterval(intervalId);
+  }, [fetchSwaps, isActive, loadMessages, openSwap?.id]);
+
+  useEffect(() => {
+    if (!openSwap || !swaps) return;
+    const updatedOpenSwap = swaps.find((swap) => swap.id === openSwap.id);
+    if (updatedOpenSwap) {
+      setOpenSwap(updatedOpenSwap);
+    }
+  }, [openSwap, swaps]);
 
   const conversations = useMemo(() => {
     return (swaps || []).filter((swap) => {
@@ -92,7 +150,12 @@ export default function MessagesScreen() {
     if (!openSwap || !user || !draft.trim() || isSending) return;
     const body = draft;
     setDraft("");
-    await sendMessage(() => api.sendSwapMessage(openSwap.id, user.id, body));
+    const createdMessage = await sendMessage(() => api.sendSwapMessage(openSwap.id, user.id, body));
+    setMessages((currentMessages) => {
+      const existingMessages = currentMessages || [];
+      if (existingMessages.some((message) => message.id === createdMessage.id)) return existingMessages;
+      return [...existingMessages, createdMessage];
+    });
     loadMessages(() => api.getSwapMessages(openSwap.id));
     fetchSwaps();
   }
