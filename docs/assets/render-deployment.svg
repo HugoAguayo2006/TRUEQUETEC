@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">Render backend deployment</title>
+  <desc id="desc">Deployment card for TRUEQUETEC backend hosted on Render.</desc>
+  <rect width="1200" height="680" fill="#09090b"/>
+  <rect x="70" y="70" width="1060" height="540" rx="18" fill="#0f0f12" stroke="#3f3f46" stroke-width="2"/>
+  <text x="105" y="130" fill="#ffffff" font-family="Arial, sans-serif" font-size="30" font-weight="700">Render - Backend</text>
+  <text x="105" y="190" fill="#a78bfa" font-family="Arial, sans-serif" font-size="24" font-weight="700">truquetec-api</text>
+  <text x="105" y="235" fill="#d4d4d8" font-family="Arial, sans-serif" font-size="22">Web Service / FastAPI</text>
+  <text x="105" y="300" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="22">URL publica</text>
+  <text x="105" y="340" fill="#c4b5fd" font-family="Arial, sans-serif" font-size="26">https://truquetec-api.onrender.com</text>
+  <rect x="105" y="405" width="990" height="90" rx="12" fill="#1f1235"/>
+  <circle cx="145" cy="450" r="12" fill="#22c55e"/>
+  <text x="175" y="460" fill="#ffffff" font-family="Arial, sans-serif" font-size="24" font-weight="700">Live</text>
+  <text x="260" y="460" fill="#d4d4d8" font-family="Arial, sans-serif" font-size="22">uvicorn main:app --host 0.0.0.0 --port $PORT</text>
+  <text x="105" y="555" fill="#d1d5db" font-family="Arial, sans-serif" font-size="22">API REST, WebSockets, CORS y conexion a Neon PostgreSQL.</text>
+</svg>
