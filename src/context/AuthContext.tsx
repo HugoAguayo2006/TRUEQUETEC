@@ -1,8 +1,11 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useCallback, useContext, useState } from "react";
 
 interface UserProfile {
 	id: string;
 	email: string;
+	username?: string;
+	bio?: string;
+	rating?: number;
 	role?: "user" | "admin";
 	name?: string;
 	[key: string]: any;
@@ -30,17 +33,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		return null;
 	});
 
-	const loginSession = (userData: UserProfile) => {
+	const loginSession = useCallback((userData: UserProfile) => {
 		setUser(userData);
 		localStorage.setItem("current_user_id", userData.id);
 		localStorage.setItem("current_user", JSON.stringify(userData));
-	};
+	}, []);
 
-	const logoutSession = () => {
+	const logoutSession = useCallback(() => {
 		setUser(null);
 		localStorage.removeItem("current_user_id");
 		localStorage.removeItem("current_user");
-	};
+	}, []);
 
 	return (
 		<AuthContext.Provider value={{ user, isAuthenticated: !!user, loginSession, logoutSession }}>

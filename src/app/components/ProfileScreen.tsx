@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Star, Plus, Pencil, LogOut } from "lucide-react";
+import { Star, Plus, Pencil, LogOut, MessageSquareText } from "lucide-react";
 import React from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useApi } from "../../hooks/use_api";
-import { api, ItemResponseData, SwapResponseData } from "../../services/endpoints.ts";
+import { api, ItemResponseData, SwapRatingDetailResponseData, SwapResponseData } from "../../services/endpoints.ts";
 import AddListingScreen from "./AddListingScreen.tsx";
 import ProductPrice from "./ProductPrice.tsx";
 
@@ -20,7 +20,10 @@ export default function ProfileScreen({ isActive = false }: Props) {
 	const { execute: fetchSwaps, data: swaps } = useApi<SwapResponseData[]>();
 	const { execute: createNewItem } = useApi<ItemResponseData>();
 	const { execute: updateExistingItem } = useApi<ItemResponseData>();
-	const { user, logoutSession } = useAuth();
+	const { user, loginSession, logoutSession } = useAuth();
+	const [reviews, setReviews] = useState<SwapRatingDetailResponseData[]>([]);
+	const [reviewsLoading, setReviewsLoading] = useState(false);
+	const [reviewsError, setReviewsError] = useState<string | null>(null);
 
 	const fetchUserItems = React.useCallback(() => {
 		if (user?.id) {
@@ -28,16 +31,38 @@ export default function ProfileScreen({ isActive = false }: Props) {
 		}
 	}, [user?.id, execute]);
 
+	const fetchFreshUser = React.useCallback(async () => {
+		if (!user?.id) return;
+		const freshUser = await api.getUser(user.id);
+		loginSession(freshUser);
+	}, [loginSession, user?.id]);
+
 	const fetchUserSwaps = React.useCallback(() => {
 		if (user?.id) {
 			fetchSwaps(() => api.getSwaps(user.id));
 		}
 	}, [fetchSwaps, user?.id]);
 
+	const fetchReviews = React.useCallback(async () => {
+		if (!user?.id) return;
+		setReviewsLoading(true);
+		setReviewsError(null);
+		try {
+			const receivedReviews = await api.getReceivedRatings(user.id);
+			setReviews(receivedReviews);
+		} catch (err: any) {
+			setReviewsError(err.message || "No se pudieron cargar las reseñas.");
+		} finally {
+			setReviewsLoading(false);
+		}
+	}, [user?.id]);
+
 	const refreshProfile = React.useCallback(() => {
+		fetchFreshUser();
 		fetchUserItems();
 		fetchUserSwaps();
-	}, [fetchUserItems, fetchUserSwaps]);
+		fetchReviews();
+	}, [fetchFreshUser, fetchUserItems, fetchUserSwaps, fetchReviews]);
 
 	useEffect(() => {
 		refreshProfile();
@@ -132,7 +157,6 @@ export default function ProfileScreen({ isActive = false }: Props) {
 					</button>
 				</div>
 
-				{/* Stats */}
 				<div className="grid grid-cols-2 gap-2 mb-5">
 					{[
 						{ label: "Trueques", value: swaps?.filter((swap) => swap.status === "completed").length || 0 },
@@ -148,6 +172,32 @@ export default function ProfileScreen({ isActive = false }: Props) {
 				<p className="text-sm leading-relaxed mb-5" style={{ color: "#7A8A9A" }}>
 					{user.bio}
 				</p>
+
+				<div className="grid grid-cols-2 gap-2">
+					<button
+						onClick={() => setTab("listings")}
+						className="rounded-2xl py-3 text-sm font-bold transition-all active:scale-[0.98]"
+						style={{
+							background: tab === "listings" ? "rgba(0,205,184,0.14)" : "#111820",
+							color: tab === "listings" ? "#00CDB8" : "#7A8A9A",
+							border: tab === "listings" ? "1.5px solid rgba(0,205,184,0.3)" : "1.5px solid rgba(255,255,255,0.06)",
+						}}
+					>
+						Publicaciones
+					</button>
+					<button
+						onClick={() => setTab("reviews")}
+						className="rounded-2xl py-3 text-sm font-bold transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+						style={{
+							background: tab === "reviews" ? "rgba(0,205,184,0.14)" : "#111820",
+							color: tab === "reviews" ? "#00CDB8" : "#7A8A9A",
+							border: tab === "reviews" ? "1.5px solid rgba(0,205,184,0.3)" : "1.5px solid rgba(255,255,255,0.06)",
+						}}
+					>
+						<MessageSquareText size={15} />
+						Reseñas
+					</button>
+				</div>
 			</div>
 
 			{/* Tab content */}
@@ -199,7 +249,50 @@ export default function ProfileScreen({ isActive = false }: Props) {
 						))}
 					</div>
 				)}
+
+				{tab === "reviews" && (
+					<div className="flex flex-col gap-3">
+						{reviewsError && <p className="text-xs text-[#FF3A5C] text-center">{reviewsError}</p>}
+
+						{reviewsLoading ? (
+							<div className="flex h-40 items-center justify-center text-sm" style={{ color: "#7A8A9A" }}>
+								Cargando reseñas...
+							</div>
+						) : reviews.length === 0 ? (
+							<div className="flex h-40 flex-col items-center justify-center gap-2 text-center" style={{ color: "#7A8A9A" }}>
+								<MessageSquareText size={24} />
+								<p className="text-sm">Todavía no tienes reseñas escritas.</p>
+							</div>
+						) : (
+							reviews.map((review) => (
+								<article
+									key={review.id}
+									className="rounded-2xl p-4"
+									style={{ background: "#111820", border: "1.5px solid rgba(255,255,255,0.06)" }}
+								>
+									<div className="flex items-start justify-between gap-3">
+										<div className="min-w-0">
+											<p className="text-sm font-bold truncate" style={{ color: "#EEF2F7" }}>
+												{review.rater.username}
+											</p>
+											<p className="text-xs mt-0.5" style={{ color: "#7A8A9A" }}>
+												{new Date(review.created_at).toLocaleDateString("es-MX")}
+											</p>
+										</div>
+										<div className="flex items-center gap-1 shrink-0">
+											<Star size={14} className="fill-yellow-400 text-yellow-400" />
+											<span className="text-sm font-bold" style={{ color: "#EEF2F7" }}>{review.rating}</span>
+										</div>
+									</div>
+									<p className="text-sm leading-relaxed mt-3 whitespace-pre-line" style={{ color: "#AAB7C4" }}>
+										{review.note || "Sin comentario escrito."}
+									</p>
+								</article>
+							))
+						)}
+					</div>
+				)}
 			</div>
 		</div>
-	);
+		);
 }

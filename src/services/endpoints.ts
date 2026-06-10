@@ -45,6 +45,10 @@ export interface SwapRatingResponseData {
 	rated_user: UserResponseData;
 }
 
+export interface SwapRatingDetailResponseData extends SwapRatingResponseData {
+	rater: UserResponseData;
+}
+
 export type SwapStatus = "pending" | "awaiting" | "accepted" | "countered" | "completed" | "declined";
 
 export interface SwapResponseData {
@@ -176,6 +180,21 @@ export const api = {
 		apiClient<SwapRatingResponseData>(`/swaps/${swapId}/ratings`, {
 			method: "POST",
 			body: { rater_id: raterId, rating, note },
+		}),
+
+	getReceivedRatings: (userId: string) =>
+		apiClient<SwapRatingDetailResponseData[]>(`/swaps/ratings/received/${userId}`, {
+			method: "GET",
+		}),
+
+	getAllRatings: () =>
+		apiClient<SwapRatingDetailResponseData[]>("/swaps/ratings", {
+			method: "GET",
+		}),
+
+	deleteRating: (ratingId: string) =>
+		apiClient<void>(`/swaps/ratings/${ratingId}`, {
+			method: "DELETE",
 		}),
 
 	estimateProductPrice: (productName: string) =>
