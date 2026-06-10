@@ -6,6 +6,7 @@ El proyecto esta pensado como una plataforma de intercambio estudiantil: el fron
 
 ## Tabla de contenidos
 
+- [Integrantes](#integrantes)
 - [Descripcion clara del proyecto](#descripcion-clara-del-proyecto)
 - [Arquitectura general](#arquitectura-general)
 - [Tecnologias utilizadas](#tecnologias-utilizadas)
@@ -16,6 +17,17 @@ El proyecto esta pensado como una plataforma de intercambio estudiantil: el fron
 - [Credenciales de demo](#credenciales-de-demo)
 - [Enlaces de deploy](#enlaces-de-deploy)
 - [Endpoints principales](#endpoints-principales)
+
+## Integrantes
+
+![Integrantes del equipo TRUEQUETEC](docs/assets/integrantes.png)
+
+| Nombre | Matricula |
+| --- | --- |
+| Jose Hugo Aguayo Mendoza | A01640917 |
+| Santiago Vargas Rugeles | A01647287 |
+| Andres Ramirez Ruiz | A01647072 |
+| Maximiliano Villegas Ruiz | A01640966 |
 
 ## Descripcion clara del proyecto
 
