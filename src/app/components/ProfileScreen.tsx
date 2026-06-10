@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Star, Plus, Pencil, LogOut, MessageSquareText } from "lucide-react";
+import { Star, Plus, Pencil, LogOut, MessageSquareText, Trash2 } from "lucide-react";
 import React from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useApi } from "../../hooks/use_api";
@@ -14,9 +14,12 @@ interface Props {
 export default function ProfileScreen({ isActive = false }: Props) {
 	const [addingListing, setAddingListing] = useState(false);
 	const [editingListing, setEditingListing] = useState<ItemResponseData | null>(null);
+	const [pendingDelete, setPendingDelete] = useState<ItemResponseData | null>(null);
+	const [deletingId, setDeletingId] = useState<string | null>(null);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const [tab, setTab] = useState<"listings" | "reviews" | "settings">("listings");
 
-	const { execute, isLoading, data: items, error } = useApi<ItemResponseData[]>();
+	const { execute, isLoading, data: items, error, setData: setItems } = useApi<ItemResponseData[]>();
 	const { execute: fetchSwaps, data: swaps } = useApi<SwapResponseData[]>();
 	const { execute: createNewItem } = useApi<ItemResponseData>();
 	const { execute: updateExistingItem } = useApi<ItemResponseData>();
@@ -128,6 +131,23 @@ export default function ProfileScreen({ isActive = false }: Props) {
 		}
 	}
 
+	async function handleDeleteListing(item: ItemResponseData) {
+		if (!user?.id) return;
+		setDeletingId(item.id);
+		setDeleteError(null);
+		try {
+			await api.deleteItem(item.id, user.id);
+			setItems((currentItems) => (currentItems || []).filter((currentItem) => currentItem.id !== item.id));
+			setItemsCount((currentCount) => Math.max(currentCount - 1, 0));
+			setPendingDelete(null);
+			fetchUserItems();
+		} catch (err: any) {
+			setDeleteError(err.message || "No se pudo borrar la publicación.");
+		} finally {
+			setDeletingId(null);
+		}
+	}
+
 	if (!user) return null;
 
 	if (addingListing) {
@@ -151,7 +171,7 @@ export default function ProfileScreen({ isActive = false }: Props) {
 	}
 
 	return (
-		<div className="flex flex-col h-full" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#080C12" }}>
+		<div className="relative flex flex-col h-full" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#080C12" }}>
 			<div className="shrink-0 px-5 pt-12 pb-5">
 				<div className="flex items-start justify-between mb-5">
 					<div className="flex items-center gap-4">
@@ -235,6 +255,7 @@ export default function ProfileScreen({ isActive = false }: Props) {
 						</button>
 
 						{error && <p className="text-xs text-[#FF3A5C] text-center">No se pudieron cargar las actualizaciones.</p>}
+						{deleteError && <p className="text-xs text-[#FF3A5C] text-center">{deleteError}</p>}
 
 						{items?.map((item) => (
 							<div
@@ -256,13 +277,29 @@ export default function ProfileScreen({ isActive = false }: Props) {
 										)}
 									</div>
 								</div>
-								<button
-									onClick={() => setEditingListing(item)}
-									className="w-9 h-9 rounded-xl flex items-center justify-center"
-									style={{ color: "#00CDB8", background: "rgba(0,205,184,0.08)" }}
-								>
-									<Pencil size={16} />
-								</button>
+								<div className="flex items-center gap-2 shrink-0">
+									<button
+										onClick={() => setEditingListing(item)}
+										className="w-9 h-9 rounded-xl flex items-center justify-center"
+										style={{ color: "#00CDB8", background: "rgba(0,205,184,0.08)" }}
+										title="Editar publicación"
+									>
+										<Pencil size={16} />
+									</button>
+									<button
+										onClick={() => setPendingDelete(item)}
+										disabled={deletingId === item.id}
+										className="w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-95 disabled:opacity-60"
+										style={{ color: "#FF3A5C", background: "rgba(255,58,92,0.1)" }}
+										title="Borrar publicación"
+									>
+										{deletingId === item.id ? (
+											<div className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+										) : (
+											<Trash2 size={16} />
+										)}
+									</button>
+								</div>
 							</div>
 						))}
 					</div>
@@ -311,6 +348,43 @@ export default function ProfileScreen({ isActive = false }: Props) {
 					</div>
 				)}
 			</div>
+
+			{pendingDelete && (
+				<div className="absolute inset-0 z-50 flex items-center justify-center px-5" style={{ background: "rgba(8,12,18,0.72)", backdropFilter: "blur(10px)" }}>
+					<div className="w-full max-w-sm rounded-2xl p-4" style={{ background: "#111820", border: "1.5px solid rgba(255,255,255,0.08)", boxShadow: "0 24px 80px rgba(0,0,0,0.45)" }}>
+						<div className="flex items-start gap-3">
+							<div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0" style={{ background: "rgba(255,58,92,0.1)", color: "#FF3A5C" }}>
+								<Trash2 size={18} />
+							</div>
+							<div className="min-w-0">
+								<h2 className="text-base font-extrabold" style={{ color: "#EEF2F7" }}>Borrar publicación</h2>
+								<p className="text-sm mt-1 leading-relaxed" style={{ color: "#7A8A9A" }}>
+									Se eliminará "{pendingDelete.title}" de tu perfil.
+								</p>
+							</div>
+						</div>
+
+						<div className="flex gap-2 mt-5">
+							<button
+								onClick={() => setPendingDelete(null)}
+								disabled={deletingId === pendingDelete.id}
+								className="flex-1 rounded-2xl py-3 text-sm font-bold transition-all active:scale-[0.98] disabled:opacity-60"
+								style={{ background: "#1A2230", color: "#EEF2F7" }}
+							>
+								Cancelar
+							</button>
+							<button
+								onClick={() => handleDeleteListing(pendingDelete)}
+								disabled={deletingId === pendingDelete.id}
+								className="flex-1 rounded-2xl py-3 text-sm font-bold transition-all active:scale-[0.98] disabled:opacity-60"
+								style={{ background: "#FF3A5C", color: "#FFFFFF" }}
+							>
+								{deletingId === pendingDelete.id ? "Borrando..." : "Borrar"}
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
-		);
+	);
 }

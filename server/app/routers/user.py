@@ -4,7 +4,6 @@ import hmac
 import os
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from sqlalchemy.orm import Session
 from app.database import AsyncSession, get_db
 from app.models import User, Item
 from app.schemas import UserCreate, UserLogin, UserRead, UserResponse, UserUpdate
@@ -43,11 +42,17 @@ async def get_all_users(session: AsyncSession = Depends(get_db)):
     return result.scalars().all()
 
 @user_router.post("/", response_model=UserResponse, status_code=201, summary="Crear un usuario")
-async def create_user(data: UserCreate, session: Session = Depends(get_db)):
+async def create_user(data: UserCreate, session: AsyncSession = Depends(get_db)):
     user_data = data.model_dump()
     password = user_data.pop("password")
     if len(password) < 6:
         raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 6 caracteres")
+
+    existing_result = await session.execute(
+        select(User).where((User.email == user_data["email"]) | (User.username == user_data["username"]))
+    )
+    if existing_result.scalars().first():
+        raise HTTPException(status_code=400, detail="Este usuario ya tiene cuenta")
 
     user = User(**user_data, password_hash=hash_password(password))
     session.add(user)

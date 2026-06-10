@@ -21,6 +21,9 @@ export default function SignupScreen({ onSignup, onGoLogin }: Props) {
 
 	const { loginSession } = useAuth()
 	const { execute, isLoading, error: apiError } = useApi<any>();
+	const friendlyApiError = apiError?.toLowerCase().includes("unique") || apiError?.toLowerCase().includes("constraint")
+		? "Este usuario ya tiene cuenta"
+		: apiError;
 	function set(k: keyof typeof fields, v: string) {
 		setFields((p) => ({ ...p, [k]: v }));
 		setErrors((p) => ({ ...p, [k]: undefined }));
@@ -116,9 +119,9 @@ export default function SignupScreen({ onSignup, onGoLogin }: Props) {
 					style={{ width: `${progress}%`, background: "linear-gradient(90deg, #00CDB8, #009988)" }}
 				/>
 			</div>
-			{apiError && (
+			{friendlyApiError && (
 				<div className="text-xs p-3.5 mb-4 bg-red-500/10 border border-red-500/20 text-[#FF3A5C] rounded-2xl animate-fade-in shrink-0">
-					{apiError}
+					{friendlyApiError}
 				</div>
 			)}
 
