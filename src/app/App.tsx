@@ -46,6 +46,7 @@ export default function App() {
 	const [ratingSwap, setRatingSwap] = useState<SwapResponseData | null>(null);
 	const [latestSwap, setLatestSwap] = useState<SwapResponseData | null>(null);
 	const [viewingUserId, setViewingUserId] = useState<string | null>(null);
+	const [discoverIndex, setDiscoverIndex] = useState(0);
 
 	function handleSwapRequested(swap: SwapResponseData) {
 		setLatestSwap(swap);
@@ -150,6 +151,8 @@ export default function App() {
 						<div className={`h-full ${tab === "discover" ? "block" : "hidden"}`}>
 							<DiscoverScreen
 								isActive={tab === "discover"}
+								currentIndex={discoverIndex}
+								onIndexChange={setDiscoverIndex}
 								onSwapRequested={handleSwapRequested}
 								onViewOwner={handleViewOwner}
 							/>
