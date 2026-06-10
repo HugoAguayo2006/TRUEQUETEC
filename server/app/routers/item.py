@@ -74,7 +74,7 @@ async def get_items(request: Request,
         current_user = await session.get(User, current_user_id) if current_user_id else None
         if current_user is None or current_user.role != "admin":
             raise HTTPException(status_code=403, detail="Solo administradores pueden ver todas las publicaciones")
-        statement = select(Item)
+        statement = select(Item).where(Item.owner_id != None)
     elif skip:
         statement = select(Item).where(Item.owner_id != skip, Item.is_available == True)
     elif owner_id:
