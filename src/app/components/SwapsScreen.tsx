@@ -62,6 +62,8 @@ const STATUS_META: Record<SwapStatus, { label: string; color: string; bg: string
 };
 
 interface Props {
+	isActive?: boolean;
+	latestSwap?: SwapResponseData | null;
 	onRate?: (swap: SwapResponseData) => void;
 }
 
@@ -104,13 +106,13 @@ function summarizeItems(items: SwapResponseData["offered_items"], fallback = "Si
 	};
 }
 
-export default function SwapsScreen({ onRate }: Props) {
+export default function SwapsScreen({ isActive = false, latestSwap, onRate }: Props) {
 	const [filter, setFilter] = useState<"active" | "history">("active");
 	const [rated, setRated] = useState<string[]>([]);
 	const [pickingSwap, setPickingSwap] = useState<SwapResponseData | null>(null);
 	const [selectedOfferIds, setSelectedOfferIds] = useState<string[]>([]);
 	const { user } = useAuth();
-	const { execute, isLoading, data: swaps, error } = useApi<SwapResponseData[]>();
+	const { execute, isLoading, data: swaps, error, setData: setSwaps } = useApi<SwapResponseData[]>();
 	const { execute: updateStatus } = useApi<SwapResponseData>();
 	const { execute: loadPartnerItems, isLoading: isLoadingPartnerItems, data: partnerItems, error: partnerItemsError } = useApi<ItemResponseData[]>();
 	const { execute: sendOffer, isLoading: isSendingOffer, error: sendOfferError } = useApi<SwapResponseData>();
@@ -122,6 +124,22 @@ export default function SwapsScreen({ onRate }: Props) {
 	useEffect(() => {
 		fetchSwaps();
 	}, [fetchSwaps]);
+
+	useEffect(() => {
+		if (isActive) {
+			fetchSwaps();
+		}
+	}, [fetchSwaps, isActive]);
+
+	useEffect(() => {
+		if (!latestSwap) return;
+		setSwaps((currentSwaps) => {
+			const existingSwaps = currentSwaps || [];
+			const withoutDuplicate = existingSwaps.filter((swap) => swap.id !== latestSwap.id);
+			return [latestSwap, ...withoutDuplicate];
+		});
+		fetchSwaps();
+	}, [fetchSwaps, latestSwap, setSwaps]);
 
 	useEffect(() => {
 		if (!user?.id) return;
@@ -146,7 +164,8 @@ export default function SwapsScreen({ onRate }: Props) {
 	}, [filter, swaps, user?.id]);
 
 	async function setSwapStatus(swapId: string, status: "accepted" | "completed" | "declined") {
-		await updateStatus(() => api.updateSwapStatus(swapId, status));
+		const updatedSwap = await updateStatus(() => api.updateSwapStatus(swapId, status));
+		setSwaps((currentSwaps) => (currentSwaps || []).map((swap) => swap.id === updatedSwap.id ? updatedSwap : swap));
 		fetchSwaps();
 	}
 
@@ -158,7 +177,8 @@ export default function SwapsScreen({ onRate }: Props) {
 
 	async function handleSendOffer() {
 		if (!pickingSwap || selectedOfferIds.length === 0) return;
-		await sendOffer(() => api.updateSwapOffer(pickingSwap.id, selectedOfferIds));
+		const updatedSwap = await sendOffer(() => api.updateSwapOffer(pickingSwap.id, selectedOfferIds));
+		setSwaps((currentSwaps) => (currentSwaps || []).map((swap) => swap.id === updatedSwap.id ? updatedSwap : swap));
 		setPickingSwap(null);
 		setSelectedOfferIds([]);
 		fetchSwaps();

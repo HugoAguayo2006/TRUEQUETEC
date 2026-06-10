@@ -43,8 +43,10 @@ export default function App() {
 	const [tab, setTab] = useState<NavTab>("discover");
 	const [flow, setFlow] = useState<FlowScreen | null>(null);
 	const [ratingSwap, setRatingSwap] = useState<SwapResponseData | null>(null);
+	const [latestSwap, setLatestSwap] = useState<SwapResponseData | null>(null);
 
-	function handleSwapRequested() {
+	function handleSwapRequested(swap: SwapResponseData) {
+		setLatestSwap(swap);
 		setTab("swaps");
 	}
 
@@ -131,10 +133,10 @@ export default function App() {
 				{!inFlow && (
 					<>
 						<div className={`h-full ${tab === "discover" ? "block" : "hidden"}`}>
-							<DiscoverScreen onSwapRequested={handleSwapRequested} />
+							<DiscoverScreen isActive={tab === "discover"} onSwapRequested={handleSwapRequested} />
 						</div>
 						<div className={`h-full overflow-y-auto ${tab === "swaps" ? "block" : "hidden"}`}>
-							<SwapsScreen onRate={handleRateSwap} />
+							<SwapsScreen isActive={tab === "swaps"} latestSwap={latestSwap} onRate={handleRateSwap} />
 						</div>
 						<div className={`h-full overflow-y-auto ${tab === "messages" ? "block" : "hidden"}`}>
 							<MessagesScreen />

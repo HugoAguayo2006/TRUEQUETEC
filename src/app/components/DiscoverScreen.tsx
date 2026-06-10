@@ -7,10 +7,11 @@ import { useAuth } from "../../context/AuthContext";
 import ProductPrice from "./ProductPrice";
 
 interface Props {
+	isActive?: boolean;
 	onSwapRequested?: (swap: SwapResponseData) => void;
 }
 
-export default function DiscoverScreen({ onSwapRequested }: Props) {
+export default function DiscoverScreen({ isActive = false, onSwapRequested }: Props) {
 	const [currentIdx, setCurrentIdx] = useState(0);
 	const [dragX, setDragX] = useState(0);
 	const [isDragging, setIsDragging] = useState(false);
@@ -25,6 +26,12 @@ export default function DiscoverScreen({ onSwapRequested }: Props) {
 	}, [execute, user?.id]);
 
 	useEffect(() => { fetch_items(); }, [fetch_items])
+
+	useEffect(() => {
+		if (isActive) {
+			fetch_items();
+		}
+	}, [fetch_items, isActive]);
 
 	if (!user) return null;
 

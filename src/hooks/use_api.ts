@@ -40,5 +40,5 @@ export function useApi<T>() {
 	);
 
 	// Expose setError so components can manually clear or inject custom field validation issues
-	return { execute, isLoading, error, data, setError };
+	return { execute, isLoading, error, data, setData, setError };
 }
