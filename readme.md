@@ -6,6 +6,7 @@ El proyecto esta pensado como una plataforma de intercambio estudiantil: el fron
 
 ## Tabla de contenidos
 
+- [Integrantes](#integrantes)
 - [Descripcion clara del proyecto](#descripcion-clara-del-proyecto)
 - [Arquitectura general](#arquitectura-general)
 - [Tecnologias utilizadas](#tecnologias-utilizadas)
@@ -16,6 +17,17 @@ El proyecto esta pensado como una plataforma de intercambio estudiantil: el fron
 - [Credenciales de demo](#credenciales-de-demo)
 - [Enlaces de deploy](#enlaces-de-deploy)
 - [Endpoints principales](#endpoints-principales)
+
+## Integrantes
+
+![Integrantes del equipo TRUEQUETEC](docs/assets/integrantes.png)
+
+| Nombre | Matricula |
+| --- | --- |
+| Jose Hugo Aguayo Mendoza | A01640917 |
+| Santiago Vargas Rugeles | A01647287 |
+| Andres Ramirez Ruiz | A01647072 |
+| Maximiliano Villegas Ruiz | A01640966 |
 
 ## Descripcion clara del proyecto
 
@@ -208,12 +220,12 @@ USD_TO_MXN_RATE=18.5
 
 La base de datos ya esta implementada con las tablas principales del sistema: `users`, `items`, `swipes`, `swaps`, `messages` y `swap_ratings`.
 
-![Diagrama de base de datos](docs/assets/database-diagram.svg)
+![Diagrama de base de datos](docs/assets/db.png)
 
 - Diagrama editable en Lucidchart: https://lucid.app/lucidchart/54971b43-3244-4b4a-8c03-ed5d8dc7b35a/edit?viewport_loc=-2273%2C-882%2C3585%2C1832%2C0_0&invitationId=inv_d1874b5e-9add-442a-8077-f6e0f736abb4
 - Base de datos en produccion: Neon PostgreSQL.
 
-![Base de datos en Neon](docs/assets/neon-database.svg)
+![Base de datos en Neon](docs/assets/neon.png)
 
 ## Presentacion y demo
 
@@ -242,15 +254,15 @@ Con la cuenta administradora se puede acceder al panel administrativo de la apli
 
 **Frontend en Vercel**
 
-![Deploy frontend en Vercel](docs/assets/vercel-deployment.svg)
+![Deploy frontend en Vercel](docs/assets/vercel.png)
 
 **Backend en Render**
 
-![Deploy backend en Render](docs/assets/render-deployment.svg)
+![Deploy backend en Render](docs/assets/render.png)
 
 **Base de datos en Neon**
 
-![Base de datos en Neon](docs/assets/neon-database.svg)
+![Base de datos en Neon](docs/assets/neon.png)
 
 Si las URLs finales cambian, actualiza tambien:
 
