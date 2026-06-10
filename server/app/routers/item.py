@@ -2,12 +2,13 @@ from typing import List, Optional
 
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Request, Response, status
 from app.database import AsyncSession, get_db
-from app.models import  Item, User
+from app.models import  Item, Swipe, Swap, User
 from app.schemas import  ItemCreate, ItemResponse, ItemUpdate
 from sqlmodel import select
 from dotenv import load_dotenv
 import cloudinary
 import cloudinary.uploader
+import json
 import os
 
 load_dotenv()
@@ -18,6 +19,32 @@ cloudinary.config(
     api_key = os.getenv("CLOUDINARY_API_KEY"), 
     api_secret = os.getenv("CLOUDINARY_API_SECRET"),
 )
+
+
+def _parse_item_ids(raw_item_ids: str) -> List[str]:
+    try:
+        item_ids = json.loads(raw_item_ids or "[]")
+    except json.JSONDecodeError:
+        return []
+    if not isinstance(item_ids, list):
+        return []
+    return [str(item_id) for item_id in item_ids if item_id]
+
+
+async def _item_has_activity(item_id: str, session: AsyncSession) -> bool:
+    swipe_result = await session.execute(select(Swipe).where(Swipe.item_id == item_id))
+    if swipe_result.scalars().first():
+        return True
+
+    wanted_swap_result = await session.execute(select(Swap).where(Swap.wanted_item_id == item_id))
+    if wanted_swap_result.scalars().first():
+        return True
+
+    swaps_result = await session.execute(select(Swap))
+    return any(
+        item_id in _parse_item_ids(swap.offered_item_ids)
+        for swap in swaps_result.scalars().all()
+    )
 
 @item_router.post("/upload-image", summary="Subir una imagen")
 async def upload_item_image(file: UploadFile = File(...)):
@@ -114,6 +141,13 @@ async def delete_item(
 
     if not is_admin and not is_owner:
         raise HTTPException(status_code=403, detail="Solo puedes eliminar tus propias publicaciones")
+
+    if await _item_has_activity(item_id, session):
+        item.owner_id = None
+        item.is_available = False
+        session.add(item)
+        await session.commit()
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
 
     await session.delete(item)
     await session.commit()
